@@ -1,0 +1,10 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block nav_links %}
+<li><a href="/admin-home/" class="nav-link {% if request.path == '/admin-home/' %}active{% endif %}" id="adm-nav-home">Control Panel</a></li>
+<li><a href="#" class="nav-link" id="adm-nav-orgs">Organizations</a></li>
+<li><a href="#" class="nav-link" id="adm-nav-emissions">Emissions</a></li>
+<li><a href="#" class="nav-link" id="adm-nav-credits">Credits</a></li>
+<li><a href="#" class="nav-link" id="adm-nav-reports">Reports</a></li>
+{% endblock %}
