@@ -1,3 +1,4 @@
+from django.http import request
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib import messages
@@ -10,6 +11,7 @@ def home(request):
     return render(request, "home.html")
 
 def org_home(request):
+    
     return render(request, "ORGANI/home.html")
 
 def admin_home(request):
@@ -72,3 +74,8 @@ def login_view(request):
 def logout_view(request):
     auth_logout(request)
     return redirect("/login/")
+
+
+
+ 
+ 
