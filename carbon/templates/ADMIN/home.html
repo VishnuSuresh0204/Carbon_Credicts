@@ -1,0 +1,145 @@
+﻿{% extends "base.html" %}
+{% load static %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block meta_description %}CarbonX Admin Control Panel - Manage all organizations and carbon data{% endblock %}
+
+{% block nav_links %}
+<li><a href="/admin-home/" class="nav-link active" id="adm-nav-home">Control Panel</a></li>
+<li><a href="#" class="nav-link" id="adm-nav-orgs">Organizations</a></li>
+<li><a href="#" class="nav-link" id="adm-nav-emissions">Emissions</a></li>
+<li><a href="#" class="nav-link" id="adm-nav-credits">Credits</a></li>
+<li><a href="#" class="nav-link" id="adm-nav-reports">Reports</a></li>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top:2rem;padding-bottom:3rem;">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="d-flex align-center justify-between">
+      <div>
+        <div style="display:inline-flex;align-items:center;gap:.5rem;padding:.25rem .8rem;background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.3);border-radius:20px;font-family:'Share Tech Mono',monospace;font-size:.65rem;color:#ff6b35;letter-spacing:.12em;margin-bottom:.6rem;">
+          ADMIN ACCESS
+        </div>
+        <h1 class="section-title" style="color:#ff6b35;text-shadow:0 0 20px rgba(255,107,53,0.5);">Admin Control Panel</h1>
+        <p class="section-subtitle">System oversight &mdash; All organizations and emission data</p>
+      </div>
+      <div style="display:flex;gap:.75rem;align-items:center;">
+        <span style="font-family:'Share Tech Mono',monospace;font-size:.72rem;color:rgba(208,244,255,.5);letter-spacing:.1em;">
+          LIVE: <span style="color:#ff6b35;" id="adm-clock">--:--:--</span>
+        </span>
+        <div style="width:8px;height:8px;border-radius:50%;background:#ff6b35;box-shadow:0 0 8px #ff6b35;animation:blink 1.5s infinite;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="grid-4" style="margin-bottom:2rem;">
+    <div class="stat-card" id="adm-stat-orgs" style="border-color:rgba(255,107,53,0.2);">
+      <div style="font-size:1.6rem;margin-bottom:.5rem;">&#127970;</div>
+      <div class="stat-value" style="color:#ff6b35;text-shadow:0 0 20px rgba(255,107,53,.5);">0</div>
+      <div class="stat-label">Total Organizations</div>
+    </div>
+    <div class="stat-card" id="adm-stat-emissions" style="border-color:rgba(255,107,53,0.2);">
+      <div style="font-size:1.6rem;margin-bottom:.5rem;">&#128201;</div>
+      <div class="stat-value">0.0 <span style="font-size:1rem;">t</span></div>
+      <div class="stat-label">Total CO2 Recorded</div>
+    </div>
+    <div class="stat-card" id="adm-stat-credits" style="border-color:rgba(255,107,53,0.2);">
+      <div style="font-size:1.6rem;margin-bottom:.5rem;">&#127758;</div>
+      <div class="stat-value" style="color:#00e5ff;text-shadow:0 0 20px rgba(0,229,255,.5);">0</div>
+      <div class="stat-label">Credits Issued</div>
+    </div>
+    <div class="stat-card" id="adm-stat-pending" style="border-color:rgba(255,107,53,0.2);">
+      <div style="font-size:1.6rem;margin-bottom:.5rem;">&#9203;</div>
+      <div class="stat-value" style="color:#ffc800;text-shadow:0 0 20px rgba(255,200,0,.5);">0</div>
+      <div class="stat-label">Pending Reviews</div>
+    </div>
+  </div>
+
+  <!-- Organizations Table -->
+  <div class="glass-card mb-3" id="adm-org-table-card" style="border-color:rgba(255,107,53,0.2);">
+    <div class="d-flex align-center justify-between mb-2">
+      <div>
+        <h2 style="font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:600;color:#ff6b35;letter-spacing:.08em;">Registered Organizations</h2>
+        <p class="section-subtitle">All entities under platform management</p>
+      </div>
+      <div style="display:flex;gap:.5rem;">
+        <input type="text" id="adm-org-search" placeholder="Search..." style="padding:.4rem .8rem;background:rgba(255,107,53,0.06);border:1px solid rgba(255,107,53,0.2);border-radius:6px;color:#d0f4ff;font-size:.8rem;outline:none;width:180px;">
+      </div>
+    </div>
+    <table class="futuristic-table" id="adm-org-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Organization</th>
+          <th>Industry</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Registered</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for org in organizations %}
+        <tr>
+          <td style="color:rgba(208,244,255,.4);font-family:'Share Tech Mono',monospace;font-size:.78rem;">{{ forloop.counter }}</td>
+          <td style="font-weight:600;color:#d0f4ff;">{{ org.organization_name }}</td>
+          <td><span class="badge badge-info">{{ org.industry_type }}</span></td>
+          <td style="color:rgba(208,244,255,.65);">{{ org.email }}</td>
+          <td style="color:rgba(208,244,255,.65);">{{ org.phone }}</td>
+          <td style="font-family:'Share Tech Mono',monospace;font-size:.78rem;color:rgba(208,244,255,.5);">{{ org.created_at|date:"d M Y" }}</td>
+          <td>
+            <div style="display:flex;gap:.4rem;">
+              <a href="#" id="adm-org-view-{{ org.id }}" style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#00e5ff;text-decoration:none;padding:.25rem .5rem;border:1px solid rgba(0,229,255,.3);border-radius:4px;transition:.2s;" onmouseover="this.style.background='rgba(0,229,255,.1)'" onmouseout="this.style.background='transparent'">View</a>
+              <a href="#" id="adm-org-delete-{{ org.id }}" style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#ff6b35;text-decoration:none;padding:.25rem .5rem;border:1px solid rgba(255,107,53,.3);border-radius:4px;transition:.2s;" onmouseover="this.style.background='rgba(255,107,53,.1)'" onmouseout="this.style.background='transparent'">Delete</a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" style="text-align:center;color:rgba(208,244,255,.35);padding:2rem;font-family:'Share Tech Mono',monospace;font-size:.78rem;letter-spacing:.1em;">NO ORGANIZATIONS REGISTERED YET</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Admin Quick Actions -->
+  <div class="glass-card" id="adm-quick-actions" style="border-color:rgba(255,107,53,0.2);">
+    <h2 style="font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:600;color:#ff6b35;letter-spacing:.08em;margin-bottom:1.25rem;">Admin Actions</h2>
+    <div style="display:flex;flex-wrap:wrap;gap:1rem;">
+      <a href="#" id="adm-action-add-credits" class="btn" style="background:linear-gradient(135deg,#ff6b35,#ff4d4d);color:#fff;box-shadow:0 4px 20px rgba(255,107,53,.35);font-size:.75rem;">Issue Credits</a>
+      <a href="#" id="adm-action-view-emissions" class="btn btn-outline" style="font-size:.75rem;">All Emissions</a>
+      <a href="#" id="adm-action-report" class="btn btn-outline" style="font-size:.75rem;color:#00e5ff;border-color:rgba(0,229,255,.4);">System Report</a>
+      <a href="/admin/" id="adm-action-django-admin" class="btn btn-outline" style="font-size:.75rem;color:#ffc800;border-color:rgba(255,200,0,.4);" target="_blank">Django Admin</a>
+    </div>
+  </div>
+
+</div>
+
+<style>
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+</style>
+<script>
+  function updateClock(){
+    var d = new Date();
+    var el = document.getElementById('adm-clock');
+    if(el) el.textContent = d.toLocaleTimeString('en-IN', {hour12:false});
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // Search filter
+  var searchInput = document.getElementById('adm-org-search');
+  if(searchInput){
+    searchInput.addEventListener('input', function(){
+      var val = this.value.toLowerCase();
+      var rows = document.querySelectorAll('#adm-org-table tbody tr');
+      rows.forEach(function(r){
+        r.style.display = r.textContent.toLowerCase().includes(val) ? '' : 'none';
+      });
+    });
+  }
+</script>
+{% endblock %}
