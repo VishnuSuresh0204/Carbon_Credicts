@@ -21,3 +21,70 @@ class Organization(models.Model):
  
     def __str__(self):
         return self.organization_name
+
+
+# ============================================================
+# EMISSION RECORD
+# ============================================================
+
+class EmissionRecord(models.Model):
+
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE
+    )
+
+    electricity_consumption = models.FloatField()
+
+    fuel_consumption = models.FloatField()
+
+    transportation_distance = models.FloatField()
+
+    production_level = models.FloatField()
+
+    total_emission = models.FloatField()
+
+    status = models.CharField(
+        max_length=30,
+        default="Pending"
+    )
+    # Pending / Verified / Rejected
+
+    recorded_date = models.DateField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return f"{self.organization} - {self.recorded_date}"
+
+
+# ============================================================
+# ML EMISSION PREDICTION
+# ============================================================
+
+class EmissionPrediction(models.Model):
+
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE
+    )
+
+    electricity_consumption = models.FloatField()
+
+    fuel_consumption = models.FloatField()
+
+    transportation_distance = models.FloatField()
+
+    production_level = models.FloatField()
+
+    predicted_emission = models.FloatField()
+
+    prediction_date = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return (
+            f"{self.organization} - "
+            f"{self.predicted_emission} tonnes"
+        )
