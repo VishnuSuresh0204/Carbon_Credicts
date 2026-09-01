@@ -1,0 +1,10 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block nav_links %}
+<li><a href="/org-home/" class="nav-link {% if request.path == '/org-home/' %}active{% endif %}" id="org-nav-home">Dashboard</a></li>
+<li><a href="#" class="nav-link" id="org-nav-emissions">Emissions</a></li>
+<li><a href="#" class="nav-link" id="org-nav-credits">Credits</a></li>
+<li><a href="#" class="nav-link" id="org-nav-reports">Reports</a></li>
+{% endblock %}
+{% endblock %}
