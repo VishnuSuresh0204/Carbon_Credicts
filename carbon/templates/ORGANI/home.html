@@ -1,0 +1,145 @@
+﻿{% extends "base.html" %}
+{% load static %}
+{% block title %}Organization Dashboard{% endblock %}
+{% block meta_description %}Your carbon emission dashboard - monitor, track and manage your organization carbon credits.{% endblock %}
+
+{% block nav_links %}
+<li><a href="/org-home/" class="nav-link active" id="org-nav-home">Dashboard</a></li>
+<li><a href="#" class="nav-link" id="org-nav-emissions">Emissions</a></li>
+<li><a href="#" class="nav-link" id="org-nav-credits">Credits</a></li>
+<li><a href="#" class="nav-link" id="org-nav-reports">Reports</a></li>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top:2rem;padding-bottom:3rem;">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="d-flex align-center justify-between">
+      <div>
+        <h1 class="section-title">Organization Dashboard</h1>
+        <p class="section-subtitle">Welcome, {{ user.username }} &mdash; Real-time emission intelligence</p>
+      </div>
+      <div style="display:flex;gap:.75rem;align-items:center;">
+        <span style="font-family:'Share Tech Mono',monospace;font-size:.72rem;color:rgba(208,244,255,.5);letter-spacing:.1em;">
+          LAST SYNC: <span style="color:#00ffb4;" id="org-sync-time">--:--:--</span>
+        </span>
+        <div style="width:8px;height:8px;border-radius:50%;background:#00ffb4;box-shadow:0 0 8px #00ffb4;animation:blink 1.5s infinite;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="grid-4" style="margin-bottom:2rem;">
+    <div class="stat-card" id="org-stat-emissions">
+      <div style="font-size:1.6rem;margin-bottom:.5rem;">&#128201;</div>
+      <div class="stat-value">0.0 <span style="font-size:1rem;">t</span></div>
+      <div class="stat-label">Total Emissions (CO2)</div>
+    </div>
+    <div class="stat-card" id="org-stat-credits">
+      <div style="font-size:1.6rem;margin-bottom:.5rem;">&#127758;</div>
+      <div class="stat-value" style="color:#00e5ff;text-shadow:0 0 20px rgba(0,229,255,.5);">0</div>
+      <div class="stat-label">Carbon Credits</div>
+    </div>
+    <div class="stat-card" id="org-stat-reduction">
+      <div style="font-size:1.6rem;margin-bottom:.5rem;">&#9650;</div>
+      <div class="stat-value" style="color:#ffc800;text-shadow:0 0 20px rgba(255,200,0,.5);">0%</div>
+      <div class="stat-label">Reduction This Month</div>
+    </div>
+    <div class="stat-card" id="org-stat-compliance">
+      <div style="font-size:1.6rem;margin-bottom:.5rem;">&#9989;</div>
+      <div class="stat-value" style="color:#00ffb4;">--</div>
+      <div class="stat-label">Compliance Status</div>
+    </div>
+  </div>
+
+  <!-- Main Grid -->
+  <div style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;margin-bottom:2rem;">
+
+    <!-- Emission Records Table -->
+    <div class="glass-card" id="org-emission-table-card">
+      <div class="d-flex align-center justify-between mb-2">
+        <div>
+          <h2 style="font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:600;color:#00ffb4;letter-spacing:.08em;">Emission Records</h2>
+          <p class="section-subtitle">Latest submission log</p>
+        </div>
+        <a href="#" id="org-add-emission-btn" class="btn btn-outline" style="font-size:.7rem;padding:.45rem .9rem;">+ Add Record</a>
+      </div>
+      <table class="futuristic-table" id="org-emission-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Source</th>
+            <th>Amount (tCO2)</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="4" style="text-align:center;color:rgba(208,244,255,.35);padding:2rem;font-family:'Share Tech Mono',monospace;font-size:.78rem;letter-spacing:.1em;">NO RECORDS FOUND &mdash; ADD YOUR FIRST EMISSION</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Organization Info -->
+    <div class="glass-card" id="org-info-card" style="border-color:rgba(0,229,255,0.2);">
+      <h2 style="font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:600;color:#00e5ff;letter-spacing:.08em;margin-bottom:1.25rem;">Organization Profile</h2>
+      <div style="display:flex;flex-direction:column;gap:.9rem;">
+        <div style="padding:.75rem;background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.1);border-radius:8px;">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:rgba(208,244,255,.4);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.25rem;">Organization</div>
+          <div style="color:#d0f4ff;font-weight:500;" id="org-profile-name">
+            {% if user.organization %}{{ user.organization.organization_name }}{% else %}{{ user.username }}{% endif %}
+          </div>
+        </div>
+        <div style="padding:.75rem;background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.1);border-radius:8px;">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:rgba(208,244,255,.4);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.25rem;">Industry</div>
+          <div style="color:#d0f4ff;" id="org-profile-industry">
+            {% if user.organization %}{{ user.organization.industry_type }}{% else %}--{% endif %}
+          </div>
+        </div>
+        <div style="padding:.75rem;background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.1);border-radius:8px;">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:rgba(208,244,255,.4);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.25rem;">Account Type</div>
+          <div><span class="badge badge-success">{{ user.usertype }}</span></div>
+        </div>
+        <div style="padding:.75rem;background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.1);border-radius:8px;">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:rgba(208,244,255,.4);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.25rem;">Email</div>
+          <div style="color:#d0f4ff;font-size:.85rem;" id="org-profile-email">
+            {% if user.organization %}{{ user.organization.email }}{% else %}--{% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="glass-card" id="org-quick-actions">
+    <h2 style="font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:600;color:#00ffb4;letter-spacing:.08em;margin-bottom:1.25rem;">Quick Actions</h2>
+    <div style="display:flex;flex-wrap:wrap;gap:1rem;">
+      <a href="#" id="org-action-submit" class="btn btn-primary" style="font-size:.75rem;">Submit Emission Data</a>
+      <a href="#" id="org-action-buy-credits" class="btn btn-outline" style="font-size:.75rem;">Buy Carbon Credits</a>
+      <a href="#" id="org-action-report" class="btn btn-outline" style="font-size:.75rem;color:#00e5ff;border-color:rgba(0,229,255,.4);">Generate Report</a>
+      <a href="#" id="org-action-history" class="btn btn-outline" style="font-size:.75rem;">View History</a>
+    </div>
+  </div>
+
+</div>
+
+<style>
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+  @media(max-width:900px){
+    div[style*="grid-template-columns:2fr 1fr"]{grid-template-columns:1fr!important;}
+  }
+</style>
+<script>
+  function updateTime(){
+    var d = new Date();
+    var t = d.toLocaleTimeString('en-IN', {hour12:false});
+    var el = document.getElementById('org-sync-time');
+    if(el) el.textContent = t;
+  }
+  updateTime();
+  setInterval(updateTime, 1000);
+</script>
+{% endblock %}
