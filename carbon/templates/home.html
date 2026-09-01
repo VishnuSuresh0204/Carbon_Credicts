@@ -1,0 +1,78 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Welcome{% endblock %}
+{% block meta_description %}CarbonX - Next-generation Carbon Emission Tracking & Credit Management Platform{% endblock %}
+
+{% block content %}
+<section style="min-height:calc(100vh - 72px); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:3rem 1.5rem; text-align:center; position:relative;">
+
+    <!-- Animated ring decoration -->
+    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:600px; height:600px; border-radius:50%; border:1px solid rgba(0,255,180,0.07); animation:spin 18s linear infinite; pointer-events:none;"></div>
+    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:450px; height:450px; border-radius:50%; border:1px solid rgba(0,229,255,0.07); animation:spin 12s linear infinite reverse; pointer-events:none;"></div>
+
+    <div style="position:relative; z-index:10; max-width:780px;">
+        <div style="display:inline-flex; align-items:center; gap:0.5rem; padding:0.3rem 1rem; background:rgba(0,255,180,0.08); border:1px solid rgba(0,255,180,0.2); border-radius:20px; font-family:'Share Tech Mono',monospace; font-size:0.72rem; color:#00ffb4; letter-spacing:0.2em; text-transform:uppercase; margin-bottom:1.5rem;">
+            <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#00ffb4;box-shadow:0 0 6px #00ffb4;animation:blink 1.5s infinite;"></span>
+            System Online — Carbon Intelligence Active
+        </div>
+
+        <h1 style="font-family:'Orbitron',sans-serif; font-size:clamp(2.5rem,6vw,4.2rem); font-weight:900; letter-spacing:0.05em; line-height:1.1; margin-bottom:1.2rem;">
+            <span style="color:#d0f4ff;">Track Your</span><br>
+            <span style="background:linear-gradient(135deg,#00ffb4,#00e5ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; text-shadow:none;">Carbon Footprint</span>
+        </h1>
+
+        <p style="font-size:1.05rem; color:rgba(208,244,255,0.65); max-width:560px; margin:0 auto 2.5rem; line-height:1.7;">
+            Intelligent emission monitoring, carbon credit management, and real-time analytics — all in one futuristic platform designed for responsible organizations.
+        </p>
+
+        <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+            <a href="/register/" id="hero-register-btn" style="display:inline-flex;align-items:center;gap:.5rem;padding:.85rem 2rem;font-family:'Orbitron',sans-serif;font-size:.8rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;border-radius:10px;background:linear-gradient(135deg,#00ffb4,#00e5ff);color:#030d1a;box-shadow:0 4px 28px rgba(0,255,180,0.45);transition:all .3s ease;">
+                🚀 Get Started
+            </a>
+            <a href="/login/" id="hero-login-btn" style="display:inline-flex;align-items:center;gap:.5rem;padding:.85rem 2rem;font-family:'Orbitron',sans-serif;font-size:.8rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;border-radius:10px;background:transparent;color:#00ffb4;border:1px solid rgba(0,255,180,0.4);transition:all .3s ease;">
+                ⚡ Sign In
+            </a>
+        </div>
+    </div>
+
+    <!-- Feature cards -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.25rem;max-width:900px;margin-top:5rem;width:100%;position:relative;z-index:10;">
+        {% for item in features %}
+        <div style="background:rgba(4,20,45,0.75);border:1px solid rgba(0,255,180,0.15);border-radius:12px;padding:1.5rem;text-align:center;transition:all .3s ease;" onmouseover="this.style.borderColor='rgba(0,255,180,0.5)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='rgba(0,255,180,0.15)';this.style.transform='translateY(0)'">
+            <div style="font-size:2rem;margin-bottom:.75rem;">{{ item.icon }}</div>
+            <div style="font-family:'Orbitron',sans-serif;font-size:.8rem;font-weight:600;color:#00ffb4;margin-bottom:.4rem;letter-spacing:.08em;">{{ item.title }}</div>
+            <div style="font-size:.8rem;color:rgba(208,244,255,0.5);">{{ item.desc }}</div>
+        </div>
+        {% empty %}
+        <div style="background:rgba(4,20,45,0.75);border:1px solid rgba(0,255,180,0.15);border-radius:12px;padding:1.5rem;text-align:center;transition:all .3s ease;">
+            <div style="font-size:2rem;margin-bottom:.75rem;">📊</div>
+            <div style="font-family:'Orbitron',sans-serif;font-size:.8rem;font-weight:600;color:#00ffb4;margin-bottom:.4rem;letter-spacing:.08em;">Real-Time Monitoring</div>
+            <div style="font-size:.8rem;color:rgba(208,244,255,0.5);">Track emissions live with advanced sensors and AI analytics</div>
+        </div>
+        <div style="background:rgba(4,20,45,0.75);border:1px solid rgba(0,255,180,0.15);border-radius:12px;padding:1.5rem;text-align:center;transition:all .3s ease;">
+            <div style="font-size:2rem;margin-bottom:.75rem;">🌍</div>
+            <div style="font-family:'Orbitron',sans-serif;font-size:.8rem;font-weight:600;color:#00ffb4;margin-bottom:.4rem;letter-spacing:.08em;">Carbon Credits</div>
+            <div style="font-size:.8rem;color:rgba(208,244,255,0.5);">Manage and trade carbon credits seamlessly on the platform</div>
+        </div>
+        <div style="background:rgba(4,20,45,0.75);border:1px solid rgba(0,255,180,0.15);border-radius:12px;padding:1.5rem;text-align:center;transition:all .3s ease;">
+            <div style="font-size:2rem;margin-bottom:.75rem;">🔐</div>
+            <div style="font-family:'Orbitron',sans-serif;font-size:.8rem;font-weight:600;color:#00ffb4;margin-bottom:.4rem;letter-spacing:.08em;">Secure Reports</div>
+            <div style="font-size:.8rem;color:rgba(208,244,255,0.5);">Generate compliance-ready reports with blockchain verification</div>
+        </div>
+        <div style="background:rgba(4,20,45,0.75);border:1px solid rgba(0,255,180,0.15);border-radius:12px;padding:1.5rem;text-align:center;transition:all .3s ease;">
+            <div style="font-size:2rem;margin-bottom:.75rem;">⚡</div>
+            <div style="font-family:'Orbitron',sans-serif;font-size:.8rem;font-weight:600;color:#00ffb4;margin-bottom:.4rem;letter-spacing:.08em;">Smart Alerts</div>
+            <div style="font-size:.8rem;color:rgba(208,244,255,0.5);">Instant notifications when thresholds are breached</div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<style>
+    @keyframes spin{from{transform:translate(-50%,-50%) rotate(0deg);}to{transform:translate(-50%,-50%) rotate(360deg);}}
+    @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.2;}}
+    #hero-register-btn:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(0,255,180,.6)!important;}
+    #hero-login-btn:hover{background:rgba(0,255,180,.08)!important;transform:translateY(-2px);}
+</style>
+{% endblock %}
