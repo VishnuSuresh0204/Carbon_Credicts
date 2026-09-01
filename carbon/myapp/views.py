@@ -48,7 +48,7 @@ def register(request):
         messages.success(request, "Registration successful. Please login.")
         return redirect("/login/")
  
-    return render(request, "authentication/register.html")
+    return render(request, "register.html")
  
  
 def login_view(request):
@@ -64,7 +64,7 @@ def login_view(request):
             return redirect("/org-home/")
  
         messages.error(request, "Invalid credentials")
-        return render(request, "authentication/login.html")
+        return render(request, "login.html")
  
     return render(request, "login.html")
  
