@@ -1,0 +1,178 @@
+{% extends "ORGANI/base.html" %}
+{% load static %}
+{% block title %}Carbon Credit Marketplace{% endblock %}
+{% block meta_description %}Explore and purchase verified carbon credits to offset industrial emissions.{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 1.5rem; padding-bottom: 3.5rem;">
+
+    <!-- Page Header -->
+    <div class="page-header d-flex justify-between align-center flex-wrap gap-2">
+        <div>
+            <div class="status-pill">
+                <span class="dot"></span>
+                <span>OPEN CARBON EXCHANGE &bull; VERIFIED CERTIFICATES</span>
+            </div>
+            <h1 class="section-title">Carbon Credit Marketplace</h1>
+            <p class="section-subtitle">Acquire verified emission reduction units directly from certified industry peers</p>
+        </div>
+        <div class="d-flex gap-1">
+            <a href="/create-listing/" class="btn btn-primary btn-sm">🏷️ Sell Credits</a>
+            <a href="/wallet/" class="btn btn-outline btn-sm">💳 My Wallet ({{ wallet.available_credits }} t)</a>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="glass-card mb-3" style="padding:1rem 1.5rem;">
+        <div class="d-flex justify-between align-center flex-wrap gap-2">
+            <div class="d-flex align-center gap-1">
+                <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--clr-cyan);">FILTER:</span>
+                <input type="text" id="market-search" placeholder="Search sellers or sectors..." style="padding:0.45rem 0.9rem; background:rgba(0,229,255,0.06); border:1px solid var(--clr-border); border-radius:6px; color:#fff; font-size:0.8rem; outline:none; width:220px;">
+            </div>
+            <div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--clr-muted);">
+                AVAILABLE OFFERINGS: <strong style="color:var(--clr-primary);" id="listing-count-badge">{{ listings|length }}</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Marketplace Cards Grid -->
+    <div class="grid-3 mb-3" id="listings-grid">
+        {% for item in listings %}
+        <div class="glass-card market-item-card" data-seller="{{ item.seller.organization_name }}" data-industry="{{ item.seller.industry_type }}" style="display:flex; flex-direction:column; justify-content:space-between;">
+            
+            <div>
+                <!-- Top Badge & ID -->
+                <div class="d-flex justify-between align-center mb-2">
+                    <span class="badge badge-available">● Available</span>
+                    <span style="font-family:var(--font-mono); font-size:0.72rem; color:var(--clr-dim);">#L-{{ item.id }}</span>
+                </div>
+
+                <!-- Seller Info -->
+                <h3 style="font-family:var(--font-head); font-size:1.05rem; font-weight:700; color:var(--clr-text-bright); margin-bottom:0.25rem;">
+                    {{ item.seller.organization_name }}
+                </h3>
+                <span class="badge badge-info mb-2" style="font-size:0.65rem;">
+                    {{ item.seller.industry_type }}
+                </span>
+
+                <div class="neon-divider" style="margin:0.8rem 0;"></div>
+
+                <!-- Metrics -->
+                <div style="display:flex; flex-direction:column; gap:0.5rem; font-family:var(--font-mono); font-size:0.8rem;">
+                    <div class="d-flex justify-between">
+                        <span style="color:var(--clr-muted);">AVAILABLE VOLUME:</span>
+                        <span style="color:var(--clr-primary); font-weight:700;">{{ item.quantity }} tCO2</span>
+                    </div>
+                    <div class="d-flex justify-between">
+                        <span style="color:var(--clr-muted);">UNIT PRICE:</span>
+                        <span style="color:var(--clr-cyan); font-weight:700;">${{ item.price_per_credit }} / credit</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buy Action Form -->
+            <div style="margin-top:1.25rem;">
+                <button type="button" class="btn btn-primary btn-block btn-sm" onclick="openBuyModal('{{ item.id }}', '{{ item.seller.organization_name }}', '{{ item.quantity }}', '{{ item.price_per_credit }}')">
+                    ⚡ Purchase Credits
+                </button>
+            </div>
+
+        </div>
+        {% empty %}
+        <div class="glass-card" style="grid-column: 1 / -1; text-align:center; padding:3.5rem 1.5rem;">
+            <div style="font-size:2.5rem; margin-bottom:1rem;">🌐</div>
+            <h3 class="card-title" style="color:var(--clr-cyan);">No Active Third-Party Listings</h3>
+            <p style="font-size:0.82rem; color:var(--clr-muted); max-width:450px; margin:0.5rem auto 1.5rem;">
+                There are currently no open carbon credit listings available from other organizations. You can list your own surplus credits for sale.
+            </p>
+            <a href="/create-listing/" class="btn btn-primary btn-sm">🏷️ Create a Listing</a>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<!-- Purchase Modal Overlay -->
+<div id="buy-modal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(3,13,26,0.85); backdrop-filter:blur(12px); align-items:center; justify-content:center; padding:1.5rem;">
+    <div class="glass-card" style="max-width:450px; width:100%; border-color:var(--clr-primary); box-shadow:0 0 40px rgba(0,255,180,0.3);">
+        
+        <div class="d-flex justify-between align-center mb-2">
+            <h3 class="card-title" style="color:var(--clr-primary);">⚡ Order Execution</h3>
+            <button onclick="closeBuyModal()" style="background:none; border:none; color:var(--clr-muted); font-size:1.2rem; cursor:pointer;">✕</button>
+        </div>
+        
+        <p class="section-subtitle mb-2" id="modal-seller-label">Seller: Organization</p>
+
+        <form method="POST" action="/buy-credit/" id="buy-credit-form">
+            {% csrf_token %}
+            <input type="hidden" name="listing_id" id="modal-listing-id">
+
+            <div class="form-group">
+                <label class="form-label" for="modal-quantity">
+                    <span>Quantity to Acquire</span>
+                    <span class="form-label-hint">Max: <span id="modal-max-qty">0</span> t</span>
+                </label>
+                <input type="number" step="any" min="0.1" class="form-control" id="modal-quantity" name="quantity" required oninput="calculateModalTotal()">
+            </div>
+
+            <div style="padding:0.85rem; background:rgba(0,229,255,0.06); border:1px solid var(--clr-border-subtle); border-radius:8px; margin-bottom:1.25rem; font-family:var(--font-mono); font-size:0.8rem;">
+                <div class="d-flex justify-between mb-1">
+                    <span style="color:var(--clr-muted);">UNIT RATE:</span>
+                    <span id="modal-rate-display" style="color:var(--clr-cyan);">$0.00</span>
+                </div>
+                <div class="d-flex justify-between" style="font-size:0.95rem; font-weight:700;">
+                    <span style="color:var(--clr-text-bright);">TOTAL DUE:</span>
+                    <span id="modal-total-display" style="color:var(--clr-primary);">$0.00</span>
+                </div>
+            </div>
+
+            <div class="d-flex gap-1">
+                <button type="button" class="btn btn-outline btn-block" onclick="closeBuyModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary btn-block">Confirm Trade</button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<script>
+    var currentUnitPrice = 0;
+
+    function openBuyModal(id, seller, maxQty, price) {
+        document.getElementById('modal-listing-id').value = id;
+        document.getElementById('modal-seller-label').textContent = 'Seller: ' + seller;
+        document.getElementById('modal-max-qty').textContent = maxQty;
+        document.getElementById('modal-quantity').max = maxQty;
+        document.getElementById('modal-quantity').value = maxQty;
+        currentUnitPrice = parseFloat(price);
+        document.getElementById('modal-rate-display').textContent = '$' + currentUnitPrice.toFixed(2) + ' / credit';
+        calculateModalTotal();
+        
+        var modal = document.getElementById('buy-modal');
+        modal.style.display = 'flex';
+    }
+
+    function closeBuyModal() {
+        document.getElementById('buy-modal').style.display = 'none';
+    }
+
+    function calculateModalTotal() {
+        var qty = parseFloat(document.getElementById('modal-quantity').value) || 0;
+        var total = qty * currentUnitPrice;
+        document.getElementById('modal-total-display').textContent = '$' + total.toFixed(2);
+    }
+
+    // Search filter
+    var marketSearch = document.getElementById('market-search');
+    if (marketSearch) {
+        marketSearch.addEventListener('input', function() {
+            var q = this.value.toLowerCase();
+            var cards = document.querySelectorAll('.market-item-card');
+            cards.forEach(function(card) {
+                var txt = card.textContent.toLowerCase();
+                card.style.display = txt.includes(q) ? 'flex' : 'none';
+            });
+        });
+    }
+</script>
+{% endblock %}
