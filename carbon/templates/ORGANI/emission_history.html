@@ -1,0 +1,133 @@
+{% extends "ORGANI/base.html" %}
+{% load static %}
+{% block title %}Emission History{% endblock %}
+{% block meta_description %}Full archive and verification tracking of all industrial carbon emission records.{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 1.5rem; padding-bottom: 3.5rem;">
+
+    <!-- Page Header -->
+    <div class="page-header d-flex justify-between align-center flex-wrap gap-2">
+        <div>
+            <div class="status-pill">
+                <span class="dot"></span>
+                <span>HISTORICAL TELEMETRY LEDGER &bull; ARCHIVE</span>
+            </div>
+            <h1 class="section-title">Emission Logs & History</h1>
+            <p class="section-subtitle">Chronological record of all submitted carbon emission batches and verification states</p>
+        </div>
+        <a href="/add-emission/" class="btn btn-primary btn-sm">+ Log New Emission</a>
+    </div>
+
+    <!-- Summary KPI Row -->
+    <div class="grid-3 mb-3">
+        <div class="stat-card">
+            <div class="stat-icon">📉</div>
+            <div class="stat-value">{{ total_emission }} <span style="font-size:1rem; color:var(--clr-cyan);">t</span></div>
+            <div class="stat-label">Cumulative Recorded CO2</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🛡️</div>
+            <div class="stat-value" style="color:#00ffb4;">{{ verified_count }}</div>
+            <div class="stat-label">Verified Submissions</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-value" style="color:var(--clr-gold);">{{ pending_count }}</div>
+            <div class="stat-label">Awaiting Verification</div>
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="glass-card" id="history-table-card">
+        
+        <!-- Controls: Search & Status Filters -->
+        <div class="d-flex justify-between align-center flex-wrap gap-2 mb-3">
+            <div class="d-flex align-center gap-1 flex-wrap">
+                <button class="btn btn-outline btn-sm filter-btn active" data-filter="all" onclick="filterRecords('all', this)">All Logs</button>
+                <button class="btn btn-outline btn-sm filter-btn" data-filter="Pending" onclick="filterRecords('Pending', this)">⏳ Pending</button>
+                <button class="btn btn-outline btn-sm filter-btn" data-filter="Verified" onclick="filterRecords('Verified', this)">✓ Verified</button>
+                <button class="btn btn-outline btn-sm filter-btn" data-filter="Rejected" onclick="filterRecords('Rejected', this)">✕ Rejected</button>
+            </div>
+            <input type="text" id="log-search-input" placeholder="🔍 Search records..." style="padding:0.5rem 1rem; background:rgba(0,229,255,0.06); border:1px solid var(--clr-border); border-radius:6px; color:#fff; font-size:0.82rem; outline:none; width:220px;">
+        </div>
+
+        <div class="table-responsive">
+            <table class="futuristic-table" id="emission-history-table">
+                <thead>
+                    <tr>
+                        <th>Record ID</th>
+                        <th>Recorded Date</th>
+                        <th>Electricity (kWh)</th>
+                        <th>Fuel (L)</th>
+                        <th>Transport (km)</th>
+                        <th>Production</th>
+                        <th>Total Emission</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records %}
+                    <tr class="log-row" data-status="{{ record.status }}">
+                        <td style="font-family:var(--font-mono); font-weight:700; color:var(--clr-cyan);">#EM-{{ record.id }}</td>
+                        <td style="font-family:var(--font-mono); font-size:0.82rem; color:var(--clr-muted);">{{ record.recorded_date|date:"Y-m-d" }}</td>
+                        <td style="font-family:var(--font-mono);">{{ record.electricity_consumption }}</td>
+                        <td style="font-family:var(--font-mono);">{{ record.fuel_consumption }}</td>
+                        <td style="font-family:var(--font-mono);">{{ record.transportation_distance }}</td>
+                        <td style="font-family:var(--font-mono);">{{ record.production_level }}</td>
+                        <td style="font-family:var(--font-mono); font-weight:800; color:var(--clr-primary); font-size:0.95rem;">
+                            {{ record.total_emission }} tCO2
+                        </td>
+                        <td>
+                            {% if record.status == 'Verified' %}
+                                <span class="badge badge-verified">✓ Verified</span>
+                            {% elif record.status == 'Rejected' %}
+                                <span class="badge badge-rejected">✕ Rejected</span>
+                            {% else %}
+                                <span class="badge badge-pending">⏳ Pending</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" style="text-align:center; padding:3rem; color:var(--clr-dim); font-family:var(--font-mono);">
+                            NO EMISSION LOGS IN DATABASE YET.
+                            <br><br>
+                            <a href="/add-emission/" class="btn btn-primary btn-sm">+ Add First Emission Record</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    function filterRecords(status, btn) {
+        document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+        btn.classList.add('active');
+
+        var rows = document.querySelectorAll('.log-row');
+        rows.forEach(function(row){
+            if (status === 'all' || row.getAttribute('data-status') === status) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    var searchInput = document.getElementById('log-search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            var q = this.value.toLowerCase();
+            document.querySelectorAll('.log-row').forEach(function(row) {
+                row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+            });
+        });
+    }
+</script>
+{% endblock %}
