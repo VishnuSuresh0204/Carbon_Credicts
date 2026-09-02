@@ -1,145 +1,247 @@
-﻿{% extends "base.html" %}
+{% extends "ADMIN/base.html" %}
 {% load static %}
-{% block title %}Admin Dashboard{% endblock %}
-{% block meta_description %}CarbonX Admin Control Panel - Manage all organizations and carbon data{% endblock %}
-
-{% block nav_links %}
-<li><a href="/admin-home/" class="nav-link active" id="adm-nav-home">Control Panel</a></li>
-<li><a href="#" class="nav-link" id="adm-nav-orgs">Organizations</a></li>
-<li><a href="#" class="nav-link" id="adm-nav-emissions">Emissions</a></li>
-<li><a href="#" class="nav-link" id="adm-nav-credits">Credits</a></li>
-<li><a href="#" class="nav-link" id="adm-nav-reports">Reports</a></li>
-{% endblock %}
+{% block title %}Admin Control Panel{% endblock %}
+{% block meta_description %}Central administrative command center for emission verification and organizational oversight.{% endblock %}
 
 {% block content %}
-<div class="container" style="padding-top:2rem;padding-bottom:3rem;">
+<div class="container" style="padding-top: 1.5rem; padding-bottom: 3.5rem;">
 
-  <!-- Page Header -->
-  <div class="page-header">
-    <div class="d-flex align-center justify-between">
-      <div>
-        <div style="display:inline-flex;align-items:center;gap:.5rem;padding:.25rem .8rem;background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.3);border-radius:20px;font-family:'Share Tech Mono',monospace;font-size:.65rem;color:#ff6b35;letter-spacing:.12em;margin-bottom:.6rem;">
-          ADMIN ACCESS
-        </div>
-        <h1 class="section-title" style="color:#ff6b35;text-shadow:0 0 20px rgba(255,107,53,0.5);">Admin Control Panel</h1>
-        <p class="section-subtitle">System oversight &mdash; All organizations and emission data</p>
-      </div>
-      <div style="display:flex;gap:.75rem;align-items:center;">
-        <span style="font-family:'Share Tech Mono',monospace;font-size:.72rem;color:rgba(208,244,255,.5);letter-spacing:.1em;">
-          LIVE: <span style="color:#ff6b35;" id="adm-clock">--:--:--</span>
-        </span>
-        <div style="width:8px;height:8px;border-radius:50%;background:#ff6b35;box-shadow:0 0 8px #ff6b35;animation:blink 1.5s infinite;"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Stats Row -->
-  <div class="grid-4" style="margin-bottom:2rem;">
-    <div class="stat-card" id="adm-stat-orgs" style="border-color:rgba(255,107,53,0.2);">
-      <div style="font-size:1.6rem;margin-bottom:.5rem;">&#127970;</div>
-      <div class="stat-value" style="color:#ff6b35;text-shadow:0 0 20px rgba(255,107,53,.5);">0</div>
-      <div class="stat-label">Total Organizations</div>
-    </div>
-    <div class="stat-card" id="adm-stat-emissions" style="border-color:rgba(255,107,53,0.2);">
-      <div style="font-size:1.6rem;margin-bottom:.5rem;">&#128201;</div>
-      <div class="stat-value">0.0 <span style="font-size:1rem;">t</span></div>
-      <div class="stat-label">Total CO2 Recorded</div>
-    </div>
-    <div class="stat-card" id="adm-stat-credits" style="border-color:rgba(255,107,53,0.2);">
-      <div style="font-size:1.6rem;margin-bottom:.5rem;">&#127758;</div>
-      <div class="stat-value" style="color:#00e5ff;text-shadow:0 0 20px rgba(0,229,255,.5);">0</div>
-      <div class="stat-label">Credits Issued</div>
-    </div>
-    <div class="stat-card" id="adm-stat-pending" style="border-color:rgba(255,107,53,0.2);">
-      <div style="font-size:1.6rem;margin-bottom:.5rem;">&#9203;</div>
-      <div class="stat-value" style="color:#ffc800;text-shadow:0 0 20px rgba(255,200,0,.5);">0</div>
-      <div class="stat-label">Pending Reviews</div>
-    </div>
-  </div>
-
-  <!-- Organizations Table -->
-  <div class="glass-card mb-3" id="adm-org-table-card" style="border-color:rgba(255,107,53,0.2);">
-    <div class="d-flex align-center justify-between mb-2">
-      <div>
-        <h2 style="font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:600;color:#ff6b35;letter-spacing:.08em;">Registered Organizations</h2>
-        <p class="section-subtitle">All entities under platform management</p>
-      </div>
-      <div style="display:flex;gap:.5rem;">
-        <input type="text" id="adm-org-search" placeholder="Search..." style="padding:.4rem .8rem;background:rgba(255,107,53,0.06);border:1px solid rgba(255,107,53,0.2);border-radius:6px;color:#d0f4ff;font-size:.8rem;outline:none;width:180px;">
-      </div>
-    </div>
-    <table class="futuristic-table" id="adm-org-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Organization</th>
-          <th>Industry</th>
-          <th>Email</th>
-          <th>Phone</th>
-          <th>Registered</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for org in organizations %}
-        <tr>
-          <td style="color:rgba(208,244,255,.4);font-family:'Share Tech Mono',monospace;font-size:.78rem;">{{ forloop.counter }}</td>
-          <td style="font-weight:600;color:#d0f4ff;">{{ org.organization_name }}</td>
-          <td><span class="badge badge-info">{{ org.industry_type }}</span></td>
-          <td style="color:rgba(208,244,255,.65);">{{ org.email }}</td>
-          <td style="color:rgba(208,244,255,.65);">{{ org.phone }}</td>
-          <td style="font-family:'Share Tech Mono',monospace;font-size:.78rem;color:rgba(208,244,255,.5);">{{ org.created_at|date:"d M Y" }}</td>
-          <td>
-            <div style="display:flex;gap:.4rem;">
-              <a href="#" id="adm-org-view-{{ org.id }}" style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#00e5ff;text-decoration:none;padding:.25rem .5rem;border:1px solid rgba(0,229,255,.3);border-radius:4px;transition:.2s;" onmouseover="this.style.background='rgba(0,229,255,.1)'" onmouseout="this.style.background='transparent'">View</a>
-              <a href="#" id="adm-org-delete-{{ org.id }}" style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#ff6b35;text-decoration:none;padding:.25rem .5rem;border:1px solid rgba(255,107,53,.3);border-radius:4px;transition:.2s;" onmouseover="this.style.background='rgba(255,107,53,.1)'" onmouseout="this.style.background='transparent'">Delete</a>
+    <!-- Page Header -->
+    <div class="page-header d-flex justify-between align-center flex-wrap gap-2">
+        <div>
+            <div class="status-pill" style="color:#ff6b35; border-color:rgba(255,107,53,0.3); background:rgba(255,107,53,0.08);">
+                <span class="dot" style="background:#ff6b35; box-shadow:0 0 6px #ff6b35;"></span>
+                <span>SYSTEM CONTROL &bull; ROOT ACCESS GRANTED</span>
             </div>
-          </td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="7" style="text-align:center;color:rgba(208,244,255,.35);padding:2rem;font-family:'Share Tech Mono',monospace;font-size:.78rem;letter-spacing:.1em;">NO ORGANIZATIONS REGISTERED YET</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Admin Quick Actions -->
-  <div class="glass-card" id="adm-quick-actions" style="border-color:rgba(255,107,53,0.2);">
-    <h2 style="font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:600;color:#ff6b35;letter-spacing:.08em;margin-bottom:1.25rem;">Admin Actions</h2>
-    <div style="display:flex;flex-wrap:wrap;gap:1rem;">
-      <a href="#" id="adm-action-add-credits" class="btn" style="background:linear-gradient(135deg,#ff6b35,#ff4d4d);color:#fff;box-shadow:0 4px 20px rgba(255,107,53,.35);font-size:.75rem;">Issue Credits</a>
-      <a href="#" id="adm-action-view-emissions" class="btn btn-outline" style="font-size:.75rem;">All Emissions</a>
-      <a href="#" id="adm-action-report" class="btn btn-outline" style="font-size:.75rem;color:#00e5ff;border-color:rgba(0,229,255,.4);">System Report</a>
-      <a href="/admin/" id="adm-action-django-admin" class="btn btn-outline" style="font-size:.75rem;color:#ffc800;border-color:rgba(255,200,0,.4);" target="_blank">Django Admin</a>
+            <h1 class="section-title" style="color:#ff6b35; text-shadow:0 0 22px rgba(255,107,53,0.5);">Admin Control Panel</h1>
+            <p class="section-subtitle">Oversight hub &bull; emission verification queues, organizational caps, and credit circulation</p>
+        </div>
+        <div class="d-flex gap-1">
+            <a href="#adm-verify-section" class="btn btn-primary btn-sm" style="background:linear-gradient(135deg,#ff6b35,#ff9f1c); color:#fff;">
+                📋 Verification Queue
+            </a>
+            <a href="#adm-orgs-section" class="btn btn-outline btn-sm" style="color:#00e5ff; border-color:rgba(0,229,255,0.4);">
+                🏢 Organizations
+            </a>
+        </div>
     </div>
-  </div>
+
+    <!-- Top KPI Grid -->
+    <div class="grid-4 mb-3">
+        <div class="stat-card" style="border-color:rgba(255,107,53,0.25);">
+            <div class="stat-icon">🏢</div>
+            <div class="stat-value" style="color:#ff6b35;">{{ total_orgs_count }}</div>
+            <div class="stat-label">Registered Organizations</div>
+        </div>
+
+        <div class="stat-card" style="border-color:rgba(255,107,53,0.25);">
+            <div class="stat-icon">📉</div>
+            <div class="stat-value">{{ total_emission_sum }} <span style="font-size:0.9rem; color:var(--clr-cyan);">t</span></div>
+            <div class="stat-label">Total System CO2 Logged</div>
+        </div>
+
+        <div class="stat-card" style="border-color:rgba(255,107,53,0.25);">
+            <div class="stat-icon">💳</div>
+            <div class="stat-value" style="color:var(--clr-cyan);">{{ total_credits_sum }}</div>
+            <div class="stat-label">Active Carbon Credits</div>
+        </div>
+
+        <div class="stat-card" style="border-color:rgba(255,107,53,0.25);">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-value" style="color:#ffc800;">{{ pending_count }}</div>
+            <div class="stat-label">Pending Verifications</div>
+        </div>
+    </div>
+
+    <!-- Pending Emission Records Action Center -->
+    <div class="glass-card mb-3" id="adm-verify-section" style="border-color:rgba(255,107,53,0.3);">
+        <div class="d-flex justify-between align-center mb-2">
+            <div>
+                <h2 class="card-title" style="color:#ff6b35;">⏳ Emission Verification Queue</h2>
+                <p class="section-subtitle">Pending submissions requiring administrative audit</p>
+            </div>
+            <span class="badge badge-pending">{{ pending_count }} Pending</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="futuristic-table">
+                <thead>
+                    <tr>
+                        <th>Log ID</th>
+                        <th>Organization</th>
+                        <th>Date</th>
+                        <th>Electricity</th>
+                        <th>Fuel</th>
+                        <th>Distance</th>
+                        <th>Production</th>
+                        <th>Total CO2</th>
+                        <th>Verification Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in pending_records %}
+                    <tr>
+                        <td style="font-family:var(--font-mono); color:#ff9f1c; font-weight:700;">#EM-{{ record.id }}</td>
+                        <td style="font-weight:600; color:var(--clr-text-bright);">{{ record.organization.organization_name }}</td>
+                        <td style="font-family:var(--font-mono); font-size:0.8rem; color:var(--clr-muted);">{{ record.recorded_date|date:"Y-m-d" }}</td>
+                        <td style="font-family:var(--font-mono);">{{ record.electricity_consumption }} kWh</td>
+                        <td style="font-family:var(--font-mono);">{{ record.fuel_consumption }} L</td>
+                        <td style="font-family:var(--font-mono);">{{ record.transportation_distance }} km</td>
+                        <td style="font-family:var(--font-mono);">{{ record.production_level }}</td>
+                        <td style="font-family:var(--font-mono); font-weight:800; color:#00ffb4; font-size:0.95rem;">
+                            {{ record.total_emission }} tCO2
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <!-- Verify Form with hidden record_id in template -->
+                                <form method="POST" action="/verify-emission/" style="display:inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="record_id" value="{{ record.id }}">
+                                    <input type="hidden" name="action" value="verify">
+                                    <button type="submit" class="btn btn-sm btn-success" style="padding:0.3rem 0.65rem; font-size:0.7rem;">
+                                        ✓ Approve
+                                    </button>
+                                </form>
+
+                                <!-- Reject Form with hidden record_id in template -->
+                                <form method="POST" action="/verify-emission/" style="display:inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="record_id" value="{{ record.id }}">
+                                    <input type="hidden" name="action" value="reject">
+                                    <button type="submit" class="btn btn-sm btn-danger" style="padding:0.3rem 0.65rem; font-size:0.7rem;">
+                                        ✕ Reject
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" style="text-align:center; padding:2rem; color:var(--clr-dim); font-family:var(--font-mono);">
+                            ✓ ALL SUBMISSIONS VERIFIED &bull; NO PENDING ACTIONS
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Registered Organizations Overview -->
+    <div class="glass-card mb-3" id="adm-orgs-section">
+        <div class="d-flex justify-between align-center mb-2">
+            <div>
+                <h2 class="card-title" style="color:var(--clr-cyan);">🏢 Registered Entities</h2>
+                <p class="section-subtitle">Active organizations on the platform</p>
+            </div>
+            <input type="text" id="adm-org-search" placeholder="Search..." style="padding:.4rem .8rem; background:rgba(255,107,53,0.06); border:1px solid rgba(255,107,53,0.2); border-radius:6px; color:#d0f4ff; font-size:.8rem; outline:none; width:180px;">
+        </div>
+
+        <div class="table-responsive">
+            <table class="futuristic-table" id="adm-org-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Organization Name</th>
+                        <th>Industry</th>
+                        <th>Contact Email</th>
+                        <th>Phone</th>
+                        <th>Joined</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for org in organizations %}
+                    <tr>
+                        <td style="font-family:var(--font-mono); color:var(--clr-dim);">{{ forloop.counter }}</td>
+                        <td style="font-weight:700; color:var(--clr-text-bright);">{{ org.organization_name }}</td>
+                        <td><span class="badge badge-info">{{ org.industry_type }}</span></td>
+                        <td style="font-family:var(--font-mono); font-size:0.8rem; color:var(--clr-muted);">{{ org.email }}</td>
+                        <td style="font-family:var(--font-mono); font-size:0.8rem; color:var(--clr-muted);">{{ org.phone }}</td>
+                        <td style="font-family:var(--font-mono); font-size:0.8rem; color:var(--clr-muted);">{{ org.created_at|date:"d M Y" }}</td>
+                        <td>
+                            <button type="button" class="btn btn-outline btn-sm" style="font-size:0.68rem; padding:0.25rem 0.55rem;" onclick="openLimitModal('{{ org.id }}', '{{ org.organization_name }}')">
+                                ⚖️ Set Cap
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding:2rem; color:var(--clr-dim); font-family:var(--font-mono);">
+                            NO REGISTERED ORGANIZATIONS
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
 </div>
 
-<style>
-  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
-</style>
-<script>
-  function updateClock(){
-    var d = new Date();
-    var el = document.getElementById('adm-clock');
-    if(el) el.textContent = d.toLocaleTimeString('en-IN', {hour12:false});
-  }
-  updateClock();
-  setInterval(updateClock, 1000);
+<!-- Set Emission Limit Modal (with hidden org_id in template) -->
+<div id="limit-modal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(3,13,26,0.85); backdrop-filter:blur(12px); align-items:center; justify-content:center; padding:1.5rem;">
+    <div class="glass-card" style="max-width:440px; width:100%; border-color:#ff6b35; box-shadow:0 0 40px rgba(255,107,53,0.3);">
+        
+        <div class="d-flex justify-between align-center mb-2">
+            <h3 class="card-title" style="color:#ff6b35;">⚖️ Set Annual Emission Ceiling</h3>
+            <button onclick="closeLimitModal()" style="background:none; border:none; color:var(--clr-muted); font-size:1.2rem; cursor:pointer;">✕</button>
+        </div>
+        
+        <p class="section-subtitle mb-2" id="limit-org-name-display">Organization: ---</p>
 
-  // Search filter
-  var searchInput = document.getElementById('adm-org-search');
-  if(searchInput){
-    searchInput.addEventListener('input', function(){
-      var val = this.value.toLowerCase();
-      var rows = document.querySelectorAll('#adm-org-table tbody tr');
-      rows.forEach(function(r){
-        r.style.display = r.textContent.toLowerCase().includes(val) ? '' : 'none';
-      });
-    });
-  }
+        <form method="POST" action="/set-emission-limit/" id="set-limit-form">
+            {% csrf_token %}
+            <!-- Hidden org_id passed from template -->
+            <input type="hidden" name="org_id" id="limit-org-id">
+
+            <div class="form-group">
+                <label class="form-label" for="limit-year">Target Compliance Year</label>
+                <input type="number" min="2020" max="2050" class="form-control" id="limit-year" name="year" value="2026" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="limit-value">
+                    <span>Maximum Emission Cap</span>
+                    <span class="form-label-hint">tCO2e (Metric Tonnes)</span>
+                </label>
+                <input type="number" step="any" min="0" class="form-control" id="limit-value" name="emission_limit" placeholder="e.g. 500.0" required>
+            </div>
+
+            <p style="font-size:0.75rem; color:var(--clr-muted); margin-bottom:1.2rem; line-height:1.4;">
+                Emissions logged under this ceiling upon verification will automatically calculate surplus credits and fund the organization's carbon wallet.
+            </p>
+
+            <div class="d-flex gap-1">
+                <button type="button" class="btn btn-outline btn-block" onclick="closeLimitModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary btn-block" style="background:linear-gradient(135deg,#ff6b35,#ff9f1c); color:#fff;">Save Limit</button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<script>
+    function openLimitModal(orgId, orgName) {
+        document.getElementById('limit-org-id').value = orgId;
+        document.getElementById('limit-org-name-display').textContent = 'Target Entity: ' + orgName;
+        document.getElementById('limit-modal').style.display = 'flex';
+    }
+
+    function closeLimitModal() {
+        document.getElementById('limit-modal').style.display = 'none';
+    }
+
+    // Search filter
+    var searchInput = document.getElementById('adm-org-search');
+    if(searchInput){
+        searchInput.addEventListener('input', function(){
+            var val = this.value.toLowerCase();
+            var rows = document.querySelectorAll('#adm-org-table tbody tr');
+            rows.forEach(function(r){
+                r.style.display = r.textContent.toLowerCase().includes(val) ? '' : 'none';
+            });
+        });
+    }
 </script>
 {% endblock %}
