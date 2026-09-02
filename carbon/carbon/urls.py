@@ -28,4 +28,27 @@ urlpatterns = [
     path('login/',views.login_view),
     path('logout/',views.logout_view),
 
+    # Organization profile
+    path('profile/',views.profile),
+
+    # Emission
+    path('add-emission/',views.add_emission),
+    path('emission-history/',views.emission_history),
+
+    # ML Prediction
+    path('predict/',views.predict),
+
+    # Wallet
+    path('wallet/',views.wallet),
+
+    # Marketplace / Trading
+    path('create-listing/',views.create_listing),
+    path('marketplace/',views.marketplace),
+    path('buy-credit/',views.buy_credit),
+    path('transaction-history/',views.transaction_history),
+
+    # Admin actions
+    path('verify-emission/',views.verify_emission),
+    path('set-emission-limit/',views.set_emission_limit),
+
 ]
