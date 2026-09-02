@@ -1,0 +1,137 @@
+{% extends "ADMIN/base.html" %}
+{% load static %}
+{% block title %}Organizations Directory{% endblock %}
+{% block meta_description %}Manage and oversee all registered organizational entities and compliance caps.{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 1.5rem; padding-bottom: 3.5rem;">
+
+    <!-- Page Header -->
+    <div class="page-header d-flex justify-between align-center flex-wrap gap-2">
+        <div>
+            <div class="status-pill" style="color:#ff6b35; border-color:rgba(255,107,53,0.3); background:rgba(255,107,53,0.08);">
+                <span class="dot" style="background:#ff6b35; box-shadow:0 0 6px #ff6b35;"></span>
+                <span>ENTITY GOVERNANCE MATRIX</span>
+            </div>
+            <h1 class="section-title" style="color:#ff6b35; text-shadow:0 0 22px rgba(255,107,53,0.5);">Organizations Directory</h1>
+            <p class="section-subtitle">Full inventory of registered corporate entities, emission ceilings, and carbon wallet balances</p>
+        </div>
+        <a href="/admin-home/" class="btn btn-outline btn-sm">← Back to Control Panel</a>
+    </div>
+
+    <!-- Organizations Directory Card -->
+    <div class="glass-card">
+        <div class="d-flex justify-between align-center flex-wrap gap-2 mb-3">
+            <div class="d-flex align-center gap-1">
+                <input type="text" id="admin-org-search" placeholder="🔍 Search organizations..." style="padding:0.5rem 1rem; background:rgba(255,107,53,0.06); border:1px solid var(--clr-border); border-radius:6px; color:#fff; font-size:0.82rem; outline:none; width:260px;">
+            </div>
+            <div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--clr-muted);">
+                TOTAL ENTITIES: <strong style="color:#ff6b35;">{{ total_count }}</strong>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="futuristic-table" id="admin-org-table">
+                <thead>
+                    <tr>
+                        <th>Organization Name</th>
+                        <th>Sector</th>
+                        <th>Contact Email</th>
+                        <th>Logged CO2</th>
+                        <th>Annual Cap</th>
+                        <th>Credits Held</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in org_data %}
+                    <tr class="org-row">
+                        <td style="font-weight:700; color:var(--clr-text-bright);">
+                            {{ item.org.organization_name }}
+                            <div style="font-size:0.7rem; font-family:var(--font-mono); color:var(--clr-dim);">User: @{{ item.org.login.username }}</div>
+                        </td>
+                        <td><span class="badge badge-info">{{ item.org.industry_type }}</span></td>
+                        <td style="font-family:var(--font-mono); font-size:0.8rem; color:var(--clr-muted);">{{ item.org.email }}</td>
+                        <td style="font-family:var(--font-mono); font-weight:700; color:var(--clr-primary);">{{ item.total_emission }} t</td>
+                        <td style="font-family:var(--font-mono); color:var(--clr-gold);">
+                            {% if item.limit %}{{ item.limit }} t ({{ item.limit_year }}){% else %}<span style="color:var(--clr-dim);">Unset</span>{% endif %}
+                        </td>
+                        <td style="font-family:var(--font-mono); font-weight:700; color:var(--clr-cyan);">{{ item.credits }} Credits</td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <button type="button" class="btn btn-outline btn-sm" style="font-size:0.7rem; padding:0.3rem 0.6rem;" onclick="openLimitModal('{{ item.org.id }}', '{{ item.org.organization_name }}')">
+                                    ⚖️ Set Cap
+                                </button>
+                                <a href="/admin-delete-org/{{ item.org.id }}/" onclick="return confirm('Permanently remove {{ item.org.organization_name }}?');" class="btn btn-danger btn-sm" style="font-size:0.7rem; padding:0.3rem 0.6rem;">
+                                    🗑️ Delete
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding:3rem; color:var(--clr-dim); font-family:var(--font-mono);">
+                            NO REGISTERED ORGANIZATIONS IN DATABASE
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- Set Emission Limit Modal -->
+<div id="limit-modal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(3,13,26,0.85); backdrop-filter:blur(12px); align-items:center; justify-content:center; padding:1.5rem;">
+    <div class="glass-card" style="max-width:440px; width:100%; border-color:#ff6b35; box-shadow:0 0 40px rgba(255,107,53,0.3);">
+        <div class="d-flex justify-between align-center mb-2">
+            <h3 class="card-title" style="color:#ff6b35;">⚖️ Set Annual Emission Ceiling</h3>
+            <button onclick="closeLimitModal()" style="background:none; border:none; color:var(--clr-muted); font-size:1.2rem; cursor:pointer;">✕</button>
+        </div>
+        <p class="section-subtitle mb-2" id="limit-org-name-display">Organization: ---</p>
+
+        <form method="POST" action="/set-emission-limit/" id="set-limit-form">
+            {% csrf_token %}
+            <input type="hidden" name="org_id" id="limit-org-id">
+
+            <div class="form-group">
+                <label class="form-label" for="limit-year">Target Compliance Year</label>
+                <input type="number" min="2020" max="2050" class="form-control" id="limit-year" name="year" value="2026" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="limit-value">Maximum Emission Cap (tCO2e)</label>
+                <input type="number" step="any" min="0" class="form-control" id="limit-value" name="emission_limit" placeholder="e.g. 500.0" required>
+            </div>
+
+            <div class="d-flex gap-1 mt-2">
+                <button type="button" class="btn btn-outline btn-block" onclick="closeLimitModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary btn-block" style="background:linear-gradient(135deg,#ff6b35,#ff9f1c); color:#fff;">Save Limit</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openLimitModal(orgId, orgName) {
+        document.getElementById('limit-org-id').value = orgId;
+        document.getElementById('limit-org-name-display').textContent = 'Target Entity: ' + orgName;
+        document.getElementById('limit-modal').style.display = 'flex';
+    }
+
+    function closeLimitModal() {
+        document.getElementById('limit-modal').style.display = 'none';
+    }
+
+    var searchInput = document.getElementById('admin-org-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            var q = this.value.toLowerCase();
+            document.querySelectorAll('.org-row').forEach(function(row) {
+                row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+            });
+        });
+    }
+</script>
+{% endblock %}
