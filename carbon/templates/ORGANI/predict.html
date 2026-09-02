@@ -1,0 +1,138 @@
+{% extends "ORGANI/base.html" %}
+{% load static %}
+{% block title %}AI Predictive Emission Engine{% endblock %}
+{% block meta_description %}Machine Learning-powered carbon footprint prediction and operational forecasting.{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 1.5rem; padding-bottom: 3.5rem;">
+
+    <!-- Page Header -->
+    <div class="page-header d-flex justify-between align-center flex-wrap gap-2">
+        <div>
+            <div class="status-pill">
+                <span class="dot"></span>
+                <span>NEURAL PREDICTOR &bull; MODEL v3.2 ONLINE</span>
+            </div>
+            <h1 class="section-title">AI Emission Predictor</h1>
+            <p class="section-subtitle">Forecast upcoming carbon footprint using machine learning algorithms and parameter simulation</p>
+        </div>
+        <a href="/org-home/" class="btn btn-outline btn-sm">← Back to Dashboard</a>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid-sidebar">
+
+        <!-- Left: Simulation Form -->
+        <div class="glass-card" id="predictor-form-card">
+            <h2 class="card-title mb-2">🤖 Simulation Parameters</h2>
+            <p class="section-subtitle mb-3">Provide projected operational metrics for the target cycle</p>
+
+            <form method="POST" action="/predict/" id="predict-form">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label class="form-label" for="pred-electricity">
+                        <span>⚡ Projected Electricity</span>
+                        <span class="form-label-hint">kWh</span>
+                    </label>
+                    <input type="number" step="any" min="0" class="form-control" id="pred-electricity" name="electricity_consumption" value="{{ input_data.electricity|default:'' }}" placeholder="e.g. 18000" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="pred-fuel">
+                        <span>⛽ Projected Fuel Usage</span>
+                        <span class="form-label-hint">Liters</span>
+                    </label>
+                    <input type="number" step="any" min="0" class="form-control" id="pred-fuel" name="fuel_consumption" value="{{ input_data.fuel|default:'' }}" placeholder="e.g. 4000" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="pred-distance">
+                        <span>🚚 Fleet & Logistics Distance</span>
+                        <span class="form-label-hint">km</span>
+                    </label>
+                    <input type="number" step="any" min="0" class="form-control" id="pred-distance" name="transportation_distance" value="{{ input_data.distance|default:'' }}" placeholder="e.g. 6200" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="pred-production">
+                        <span>🏭 Target Output Production</span>
+                        <span class="form-label-hint">Units</span>
+                    </label>
+                    <input type="number" step="any" min="0" class="form-control" id="pred-production" name="production_level" value="{{ input_data.production|default:'' }}" placeholder="e.g. 1200" required>
+                </div>
+
+                <div class="neon-divider"></div>
+
+                <button type="submit" id="run-ai-predict-btn" class="btn btn-primary btn-block">
+                    🧠 Execute ML Predictive Model
+                </button>
+            </form>
+        </div>
+
+        <!-- Right: AI Result Display & Neural Insights -->
+        <div class="d-flex flex-column gap-2">
+
+            {% if predicted is not None %}
+            <!-- Result Gauge -->
+            <div class="glass-card glass-card-accent" id="prediction-result-card" style="text-align:center; border-color:var(--clr-primary);">
+                <div class="status-pill" style="margin-bottom:0.75rem;">
+                    <span class="dot"></span>
+                    <span>AI FORECAST COMPLETE</span>
+                </div>
+                <h3 class="card-title" style="color:var(--clr-cyan); margin-bottom:0.4rem;">Anticipated Carbon Emission</h3>
+
+                <div style="margin: 1.5rem 0;">
+                    <div style="font-family:var(--font-head); font-size:3.2rem; font-weight:900; color:var(--clr-primary); text-shadow:0 0 30px rgba(0,255,180,0.7);">
+                        {{ predicted }}
+                    </div>
+                    <div style="font-family:var(--font-mono); font-size:0.85rem; color:var(--clr-cyan); letter-spacing:0.15em;">
+                        ESTIMATED METRIC TONNES (tCO2e)
+                    </div>
+                </div>
+
+                <div style="padding:0.9rem; background:rgba(0,255,180,0.06); border:1px solid rgba(0,255,180,0.2); border-radius:8px; font-size:0.8rem; text-align:left; color:var(--clr-text);">
+                    <div style="font-weight:700; color:var(--clr-primary); margin-bottom:0.25rem;">💡 Neural Efficiency Recommendation</div>
+                    <p style="font-size:0.75rem; color:var(--clr-muted); line-height:1.4;">
+                        Shift approximately 15% of high-load operations to off-peak renewable grid hours to potentially reduce footprint by ~{{ predicted|floatformat:1 }} tCO2.
+                    </p>
+                </div>
+            </div>
+            {% else %}
+            <!-- Standby Card -->
+            <div class="glass-card glass-card-accent" id="prediction-standby-card" style="text-align:center; padding:2.5rem 1.5rem;">
+                <div style="font-size:3rem; margin-bottom:1rem; animation:pulse-glow 2.5s infinite;">🤖</div>
+                <h3 class="card-title" style="color:var(--clr-cyan); margin-bottom:0.4rem;">Neural Model Ready</h3>
+                <p style="font-size:0.8rem; color:var(--clr-muted); line-height:1.5;">
+                    Input projected parameters and execute simulation to visualize expected carbon generation and mitigation insights.
+                </p>
+            </div>
+            {% endif %}
+
+            <!-- Recent AI Predictions History -->
+            <div class="glass-card" id="recent-predictions-card">
+                <h4 class="card-title" style="font-size:0.9rem; margin-bottom:0.8rem;">📜 Past Forecast Runs</h4>
+                <div style="display:flex; flex-direction:column; gap:0.6rem;">
+                    {% for pred in recent_predictions %}
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:0.5rem 0.75rem; background:rgba(0,229,255,0.04); border:1px solid var(--clr-border-subtle); border-radius:6px; font-size:0.78rem;">
+                        <div>
+                            <span style="font-family:var(--font-mono); color:var(--clr-muted);">{{ pred.prediction_date|date:"M d, H:i" }}</span>
+                        </div>
+                        <div style="font-family:var(--font-mono); font-weight:700; color:var(--clr-cyan);">
+                            {{ pred.predicted_emission }} tCO2
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div style="font-size:0.75rem; color:var(--clr-dim); font-family:var(--font-mono); text-align:center; padding:1rem;">
+                        NO PAST RUNS STORED
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
