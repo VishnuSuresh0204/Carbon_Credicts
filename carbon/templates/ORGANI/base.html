@@ -1,10 +1,124 @@
-﻿{% extends "base.html" %}
 {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}CarbonX Organization Portal - Track Emissions & Manage Carbon Credit Portfolios{% endblock %}">
+    <title>{% block title %}Organization Dashboard{% endblock %} | CarbonX Portal</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <!-- Futuristic Core CSS -->
+    <link rel="stylesheet" href="{% static 'css/futuristic.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="org-entity-theme">
+    <!-- Ambient Sci-Fi Background Layer -->
+    <div class="bg-layer" style="background-image: url('{% static 'images/carbon_bg.jpg' %}');"></div>
+    <div class="bg-overlay"></div>
+    <div class="scanlines"></div>
+    <div class="glow-orb glow-orb-1"></div>
+    <div class="glow-orb glow-orb-2"></div>
 
-{% block nav_links %}
-<li><a href="/org-home/" class="nav-link {% if request.path == '/org-home/' %}active{% endif %}" id="org-nav-home">Dashboard</a></li>
-<li><a href="#" class="nav-link" id="org-nav-emissions">Emissions</a></li>
-<li><a href="#" class="nav-link" id="org-nav-credits">Credits</a></li>
-<li><a href="#" class="nav-link" id="org-nav-reports">Reports</a></li>
-{% endblock %}
-{% endblock %}
+    <!-- Organization Entity Top Navbar -->
+    <nav class="navbar" role="navigation" aria-label="Organization Portal Navigation">
+        <a href="/org-home/" class="navbar-brand" id="org-brand">
+            <div class="brand-icon">
+                <span>🌿</span>
+            </div>
+            <div>
+                <span class="brand-text">CARBON<span style="color:var(--clr-cyan);">X</span></span>
+                <span class="brand-sub">Entity Command</span>
+            </div>
+        </a>
+
+        <button class="nav-toggle-btn" id="org-nav-toggle" aria-label="Toggle navigation" onclick="document.getElementById('org-nav-menu').classList.toggle('show')">
+            ☰
+        </button>
+
+        <ul class="navbar-nav" id="org-nav-menu">
+            <li><a href="/org-home/" class="nav-link {% if request.path == '/org-home/' %}active{% endif %}" id="nav-org-home">🚀 Dashboard</a></li>
+            <li><a href="/add-emission/" class="nav-link {% if request.path == '/add-emission/' %}active{% endif %}" id="nav-org-add-emission">⚡ Submit Emission</a></li>
+            <li><a href="/emission-history/" class="nav-link {% if request.path == '/emission-history/' %}active{% endif %}" id="nav-org-history">📊 Logs</a></li>
+            <li><a href="/predict/" class="nav-link {% if request.path == '/predict/' %}active{% endif %}" id="nav-org-predict">🤖 AI Predict</a></li>
+            <li><a href="/wallet/" class="nav-link {% if request.path == '/wallet/' %}active{% endif %}" id="nav-org-wallet">💳 Wallet</a></li>
+            <li><a href="/marketplace/" class="nav-link {% if request.path == '/marketplace/' %}active{% endif %}" id="nav-org-market">🌐 Market</a></li>
+            <li><a href="/transaction-history/" class="nav-link {% if request.path == '/transaction-history/' %}active{% endif %}" id="nav-org-tx">📜 Ledger</a></li>
+            <li><a href="/profile/" class="nav-link {% if request.path == '/profile/' %}active{% endif %}" id="nav-org-profile">🏢 Profile</a></li>
+
+            {% if user.is_authenticated %}
+                <li>
+                    <span class="nav-badge nav-badge-accent" id="org-user-pill" title="Organization Identity">
+                        ⬡ {{ user.username }}
+                    </span>
+                </li>
+                <li><a href="/logout/" class="nav-btn nav-btn-outline" id="org-logout-btn">⏻ Exit</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <!-- Global Toast Alerts -->
+    {% if messages %}
+    <div class="messages-container" id="messages-container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" id="alert-{{ forloop.counter }}" role="alert">
+            <span style="font-size:1.1rem;">
+                {% if message.tags == 'success' %}✓{% elif message.tags == 'error' or message.tags == 'danger' %}⚠{% else %}ℹ{% endif %}
+            </span>
+            <span>{{ message }}</span>
+            <button class="alert-close" onclick="this.parentElement.remove()" aria-label="Close">&#10005;</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Body Container -->
+    <main class="main-content" id="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Futuristic Organization Footer -->
+    <footer class="footer-strip" id="org-footer">
+        <div class="container d-flex justify-between align-center flex-wrap gap-1">
+            <div>
+                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                &nbsp;&nbsp;CARBON<span style="color:var(--clr-cyan);">X</span> &bull; ORG NODE ACTIVE &bull; 
+                <span style="color:var(--clr-primary);" id="live-time-display">--:--:-- UTC</span>
+            </div>
+            <div style="font-size:0.68rem; color:var(--clr-dim);">
+                DECENTRALIZED CARBON LEDGER PROTOCOL &bull; VERIFIED SECURE
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Live Telemetry Clock
+        function updateClock() {
+            const el = document.getElementById('live-time-display');
+            if (el) {
+                const now = new Date();
+                el.textContent = now.toTimeString().split(' ')[0] + ' UTC';
+            }
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // Alert dismiss
+        document.querySelectorAll('.alert').forEach(function(alert){
+            setTimeout(function(){
+                alert.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateX(60px)';
+                setTimeout(function(){ alert.remove(); }, 400);
+            }, 6000);
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
