@@ -1,10 +1,120 @@
-﻿{% extends "base.html" %}
 {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}CarbonX Admin Control Center - System Governance & Verification Authority{% endblock %}">
+    <title>{% block title %}Admin Command Center{% endblock %} | CarbonX Central</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <!-- Futuristic Core CSS -->
+    <link rel="stylesheet" href="{% static 'css/futuristic.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="admin-theme">
+    <!-- Ambient Sci-Fi Background Layer -->
+    <div class="bg-layer" style="background-image: url('{% static 'images/carbon_bg.jpg' %}');"></div>
+    <div class="bg-overlay"></div>
+    <div class="scanlines"></div>
+    <div class="glow-orb glow-orb-1" style="background:rgba(255,107,53,0.3);"></div>
+    <div class="glow-orb glow-orb-2" style="background:rgba(0,229,255,0.2);"></div>
 
-{% block nav_links %}
-<li><a href="/admin-home/" class="nav-link {% if request.path == '/admin-home/' %}active{% endif %}" id="adm-nav-home">Control Panel</a></li>
-<li><a href="#" class="nav-link" id="adm-nav-orgs">Organizations</a></li>
-<li><a href="#" class="nav-link" id="adm-nav-emissions">Emissions</a></li>
-<li><a href="#" class="nav-link" id="adm-nav-credits">Credits</a></li>
-<li><a href="#" class="nav-link" id="adm-nav-reports">Reports</a></li>
-{% endblock %}
+    <!-- Admin Authority Top Navbar -->
+    <nav class="navbar" role="navigation" aria-label="Admin Command Navigation">
+        <a href="/admin-home/" class="navbar-brand" id="adm-brand">
+            <div class="brand-icon" style="border-color:#ff6b35; background:rgba(255,107,53,0.1); box-shadow:0 0 20px rgba(255,107,53,0.4);">
+                <span>🛡️</span>
+            </div>
+            <div>
+                <span class="brand-text" style="color:#ff6b35; text-shadow:0 0 16px rgba(255,107,53,0.6);">CARBON<span style="color:#ff9f1c;">X</span></span>
+                <span class="brand-sub">Root Authority Command</span>
+            </div>
+        </a>
+
+        <button class="nav-toggle-btn" id="adm-nav-toggle" aria-label="Toggle navigation" onclick="document.getElementById('adm-nav-menu').classList.toggle('show')">
+            ☰
+        </button>
+
+        <ul class="navbar-nav" id="adm-nav-menu">
+            <li><a href="/admin-home/" class="nav-link {% if request.path == '/admin-home/' %}active{% endif %}" id="nav-adm-home">🎛️ Control Panel</a></li>
+            <li><a href="/admin-home/#adm-verify-section" class="nav-link" id="nav-adm-emissions">📋 Verification Queue</a></li>
+            <li><a href="/admin-home/#adm-orgs-section" class="nav-link" id="nav-adm-orgs">🏢 Organizations</a></li>
+            <li><a href="/admin/" target="_blank" class="nav-link" id="nav-adm-django">⚙️ Django Core</a></li>
+
+            {% if user.is_authenticated %}
+                <li>
+                    <span class="nav-badge" style="color:#ff6b35; border-color:rgba(255,107,53,0.4); background:rgba(255,107,53,0.1);" id="adm-user-pill">
+                        🛡️ ROOT: {{ user.username }}
+                    </span>
+                </li>
+                <li><a href="/logout/" class="nav-btn nav-btn-outline" style="color:#ff6b35; border-color:rgba(255,107,53,0.4);" id="adm-logout-btn">⏻ Exit</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <!-- Global Toast Alerts -->
+    {% if messages %}
+    <div class="messages-container" id="messages-container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" id="alert-{{ forloop.counter }}" role="alert">
+            <span style="font-size:1.1rem;">
+                {% if message.tags == 'success' %}✓{% elif message.tags == 'error' or message.tags == 'danger' %}⚠{% else %}ℹ{% endif %}
+            </span>
+            <span>{{ message }}</span>
+            <button class="alert-close" onclick="this.parentElement.remove()" aria-label="Close">&#10005;</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Admin Content Container -->
+    <main class="main-content" id="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Futuristic Admin Command Footer -->
+    <footer class="footer-strip" id="adm-footer" style="border-color:rgba(255,107,53,0.2);">
+        <div class="container d-flex justify-between align-center flex-wrap gap-1">
+            <div>
+                <span class="dot" style="background:#ff6b35; box-shadow:0 0 6px #ff6b35;"></span>
+                <span class="dot" style="background:#ff9f1c; box-shadow:0 0 6px #ff9f1c;"></span>
+                <span class="dot" style="background:#00e5ff; box-shadow:0 0 6px #00e5ff;"></span>
+                &nbsp;&nbsp;CARBON<span style="color:#ff9f1c;">X</span> &bull; ROOT CLEARANCE LEVEL 5 &bull; 
+                <span style="color:#ff6b35;" id="adm-live-clock">--:--:-- UTC</span>
+            </div>
+            <div style="font-size:0.68rem; color:var(--clr-dim);">
+                SECURITY AUDITED &bull; REAL-TIME EMISSION GOVERNANCE &bull; ISO-14064
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        function updateAdminClock() {
+            const el = document.getElementById('adm-live-clock');
+            if (el) {
+                const now = new Date();
+                el.textContent = now.toTimeString().split(' ')[0] + ' UTC';
+            }
+        }
+        updateAdminClock();
+        setInterval(updateAdminClock, 1000);
+
+        document.querySelectorAll('.alert').forEach(function(alert){
+            setTimeout(function(){
+                alert.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateX(60px)';
+                setTimeout(function(){ alert.remove(); }, 400);
+            }, 6000);
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
