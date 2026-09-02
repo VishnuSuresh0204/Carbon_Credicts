@@ -1,0 +1,125 @@
+{% extends "ORGANI/base.html" %}
+{% load static %}
+{% block title %}Organization Profile{% endblock %}
+{% block meta_description %}Manage and update your organization profile and carbon verification credentials.{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 1.5rem; padding-bottom: 3.5rem;">
+
+    <!-- Page Header -->
+    <div class="page-header d-flex justify-between align-center flex-wrap gap-2">
+        <div>
+            <div class="status-pill">
+                <span class="dot"></span>
+                <span>IDENTITY TELEMETRY &bull; CREDENTIALS VERIFIED</span>
+            </div>
+            <h1 class="section-title">Organization Profile</h1>
+            <p class="section-subtitle">Manage legal identity, industry classification, and contact endpoints</p>
+        </div>
+        <a href="/org-home/" class="btn btn-outline btn-sm">← Back to Dashboard</a>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid-sidebar">
+        
+        <!-- Profile Update Form -->
+        <div class="glass-card" id="profile-form-card">
+            <h2 class="card-title mb-2">⚙️ Update Information</h2>
+            <form method="POST" action="/profile/" id="profile-update-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="form-label" for="org-name">
+                        <span>Organization Legal Name</span>
+                        <span class="form-label-hint">Official Registered Entity</span>
+                    </label>
+                    <input type="text" class="form-control" id="org-name" name="organization_name" value="{{ org.organization_name }}" required>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label" for="org-email">
+                            <span>Email Address</span>
+                        </label>
+                        <input type="email" class="form-control" id="org-email" name="email" value="{{ org.email }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="org-phone">
+                            <span>Phone Number</span>
+                        </label>
+                        <input type="text" class="form-control" id="org-phone" name="phone" value="{{ org.phone }}" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="org-industry">
+                        <span>Industry Classification</span>
+                    </label>
+                    <select class="form-control" id="org-industry" name="industry_type" required>
+                        <option value="Manufacturing" {% if org.industry_type == 'Manufacturing' %}selected{% endif %}>Manufacturing</option>
+                        <option value="Energy" {% if org.industry_type == 'Energy' or org.industry_type == 'Energy and Utilities' %}selected{% endif %}>Energy and Utilities</option>
+                        <option value="Transportation" {% if org.industry_type == 'Transportation' or org.industry_type == 'Transportation and Logistics' %}selected{% endif %}>Transportation and Logistics</option>
+                        <option value="Agriculture" {% if org.industry_type == 'Agriculture' %}selected{% endif %}>Agriculture</option>
+                        <option value="Construction" {% if org.industry_type == 'Construction' %}selected{% endif %}>Construction</option>
+                        <option value="Technology" {% if org.industry_type == 'Technology' %}selected{% endif %}>Technology</option>
+                        <option value="Healthcare" {% if org.industry_type == 'Healthcare' %}selected{% endif %}>Healthcare</option>
+                        <option value="Finance" {% if org.industry_type == 'Finance' or org.industry_type == 'Finance and Banking' %}selected{% endif %}>Finance and Banking</option>
+                        <option value="Retail" {% if org.industry_type == 'Retail' or org.industry_type == 'Retail and Commerce' %}selected{% endif %}>Retail and Commerce</option>
+                        <option value="Other" {% if org.industry_type == 'Other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="org-address">
+                        <span>Registered Physical Address</span>
+                    </label>
+                    <textarea class="form-control" id="org-address" name="address" rows="3" required>{{ org.address }}</textarea>
+                </div>
+
+                <button type="submit" id="save-profile-btn" class="btn btn-primary btn-block mt-2">
+                    💾 Save Profile Telemetry
+                </button>
+            </form>
+        </div>
+
+        <!-- Right Side: Identity Badge & Metadata -->
+        <div class="d-flex flex-column gap-2">
+            <div class="glass-card glass-card-accent" id="profile-meta-card">
+                <h3 class="card-title" style="color:var(--clr-cyan);">🛡️ System Metadata</h3>
+                <div class="mt-2" style="font-size:0.86rem; display:flex; flex-direction:column; gap:0.8rem;">
+                    <div class="d-flex justify-between">
+                        <span style="color:var(--clr-muted); font-family:var(--font-mono); font-size:0.75rem;">ACCOUNT USER</span>
+                        <span style="font-family:var(--font-mono); color:var(--clr-primary);">{{ user.username }}</span>
+                    </div>
+                    <div class="d-flex justify-between">
+                        <span style="color:var(--clr-muted); font-family:var(--font-mono); font-size:0.75rem;">CLEARANCE</span>
+                        <span class="badge badge-success">{{ user.usertype }}</span>
+                    </div>
+                    <div class="d-flex justify-between">
+                        <span style="color:var(--clr-muted); font-family:var(--font-mono); font-size:0.75rem;">REGISTERED ON</span>
+                        <span style="font-family:var(--font-mono); font-size:0.8rem;">{{ org.created_at|date:"d M Y, H:i" }}</span>
+                    </div>
+                    <div class="d-flex justify-between">
+                        <span style="color:var(--clr-muted); font-family:var(--font-mono); font-size:0.75rem;">TOTAL SUBMISSIONS</span>
+                        <span style="font-family:var(--font-mono); color:var(--clr-cyan); font-weight:700;">{{ total_records }} Logs</span>
+                    </div>
+                    <div class="d-flex justify-between">
+                        <span style="color:var(--clr-muted); font-family:var(--font-mono); font-size:0.75rem;">CREDIT WALLET</span>
+                        <span style="font-family:var(--font-mono); color:var(--clr-primary); font-weight:700;">{{ wallet.available_credits }} Credits</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Notice -->
+            <div class="glass-card" style="border-color:rgba(0,229,255,0.2);">
+                <div style="font-size:1.4rem; margin-bottom:0.5rem;">🔒</div>
+                <h4 style="font-family:var(--font-head); font-size:0.85rem; color:var(--clr-cyan); margin-bottom:0.4rem;">Audit Trail Guarantee</h4>
+                <p style="font-size:0.78rem; color:var(--clr-muted); line-height:1.5;">
+                    All modifications to your legal entity name, industry sector, or contact info are timestamped and cryptographically logged for carbon compliance audits.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
