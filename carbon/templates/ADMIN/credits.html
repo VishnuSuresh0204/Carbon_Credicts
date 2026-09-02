@@ -1,0 +1,150 @@
+{% extends "ADMIN/base.html" %}
+{% load static %}
+{% block title %}Carbon Credits & Market Oversight{% endblock %}
+{% block meta_description %}Central monitor of all carbon credit wallets, open market orders, and trading transactions.{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 1.5rem; padding-bottom: 3.5rem;">
+
+    <!-- Page Header -->
+    <div class="page-header d-flex justify-between align-center flex-wrap gap-2">
+        <div>
+            <div class="status-pill" style="color:#ff6b35; border-color:rgba(255,107,53,0.3); background:rgba(255,107,53,0.08);">
+                <span class="dot" style="background:#ff6b35; box-shadow:0 0 6px #ff6b35;"></span>
+                <span>ASSET CIRCULATION & MARKET SUPERVISION</span>
+            </div>
+            <h1 class="section-title" style="color:#ff6b35; text-shadow:0 0 22px rgba(255,107,53,0.5);">Credits & Marketplace Oversight</h1>
+            <p class="section-subtitle">Real-time supervision of digital carbon credit wallets, market liquidity, and trade executions</p>
+        </div>
+        <a href="/admin-home/" class="btn btn-outline btn-sm">← Control Panel</a>
+    </div>
+
+    <!-- Summary KPIs -->
+    <div class="grid-3 mb-3">
+        <div class="stat-card" style="border-color:rgba(255,107,53,0.25);">
+            <div class="stat-icon">💳</div>
+            <div class="stat-value" style="color:var(--clr-cyan);">{{ total_credits }}</div>
+            <div class="stat-label">Total Credits in Organization Wallets</div>
+        </div>
+        <div class="stat-card" style="border-color:rgba(255,107,53,0.25);">
+            <div class="stat-icon">🏷️</div>
+            <div class="stat-value" style="color:#00ffb4;">{{ listings|length }}</div>
+            <div class="stat-label">Active Market Listings</div>
+        </div>
+        <div class="stat-card" style="border-color:rgba(255,107,53,0.25);">
+            <div class="stat-icon">💰</div>
+            <div class="stat-value" style="color:#ff9f1c;">${{ total_volume }}</div>
+            <div class="stat-label">Total Settlement Trade Volume</div>
+        </div>
+    </div>
+
+    <!-- Wallets & Listings Grid -->
+    <div class="grid-2 mb-3">
+        
+        <!-- Organization Wallets -->
+        <div class="glass-card">
+            <h2 class="card-title mb-2" style="color:var(--clr-cyan);">🏢 Organization Asset Wallets</h2>
+            <div class="table-responsive">
+                <table class="futuristic-table">
+                    <thead>
+                        <tr>
+                            <th>Organization</th>
+                            <th>Available Balance</th>
+                            <th>Last Activity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for wallet in wallets %}
+                        <tr>
+                            <td style="font-weight:700; color:var(--clr-text-bright);">{{ wallet.organization.organization_name }}</td>
+                            <td style="font-family:var(--font-mono); font-weight:700; color:var(--clr-primary);">{{ wallet.available_credits }} Credits</td>
+                            <td style="font-family:var(--font-mono); font-size:0.8rem; color:var(--clr-muted);">{{ wallet.updated_at|date:"M d, H:i" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" style="text-align:center; padding:2rem; color:var(--clr-dim); font-family:var(--font-mono);">
+                                NO ACTIVE WALLETS
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Open Marketplace Listings -->
+        <div class="glass-card">
+            <h2 class="card-title mb-2" style="color:#ff9f1c;">🏷️ Active Market Listings</h2>
+            <div class="table-responsive">
+                <table class="futuristic-table">
+                    <thead>
+                        <tr>
+                            <th>Seller Entity</th>
+                            <th>Volume</th>
+                            <th>Unit Rate</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in listings %}
+                        <tr>
+                            <td style="font-weight:600; color:var(--clr-text-bright);">{{ item.seller.organization_name }}</td>
+                            <td style="font-family:var(--font-mono); font-weight:700; color:var(--clr-cyan);">{{ item.quantity }} t</td>
+                            <td style="font-family:var(--font-mono); color:#fff;">${{ item.price_per_credit }}</td>
+                            <td><span class="badge badge-available">{{ item.status }}</span></td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" style="text-align:center; padding:2rem; color:var(--clr-dim); font-family:var(--font-mono);">
+                                NO ACTIVE OPEN LISTINGS
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Platform Transaction Ledger -->
+    <div class="glass-card">
+        <h2 class="card-title mb-2" style="color:#ff6b35;">📜 System-wide Transaction Audit Trail</h2>
+        <div class="table-responsive">
+            <table class="futuristic-table">
+                <thead>
+                    <tr>
+                        <th>Tx Hash</th>
+                        <th>Buyer Organization</th>
+                        <th>Seller Organization</th>
+                        <th>Volume</th>
+                        <th>Unit Rate</th>
+                        <th>Gross Settlement</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tx in transactions %}
+                    <tr>
+                        <td style="font-family:var(--font-mono); color:#ff9f1c; font-weight:700;">#TX-{{ tx.id }}</td>
+                        <td style="font-weight:600; color:var(--clr-cyan);">{{ tx.buyer.organization_name }}</td>
+                        <td style="font-weight:600; color:var(--clr-primary);">{{ tx.seller.organization_name }}</td>
+                        <td style="font-family:var(--font-mono); font-weight:700;">{{ tx.quantity }} t</td>
+                        <td style="font-family:var(--font-mono);">${{ tx.price_per_credit }}</td>
+                        <td style="font-family:var(--font-mono); font-weight:700; color:#00ffb4;">${{ tx.total_price }}</td>
+                        <td style="font-family:var(--font-mono); font-size:0.8rem; color:var(--clr-muted);">{{ tx.transaction_date|date:"Y-m-d H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding:2rem; color:var(--clr-dim); font-family:var(--font-mono);">
+                            NO TRADING TRANSACTIONS RECORDED ON PLATFORM
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
