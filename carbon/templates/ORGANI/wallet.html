@@ -1,0 +1,156 @@
+{% extends "ORGANI/base.html" %}
+{% load static %}
+{% block title %}Carbon Credit Wallet{% endblock %}
+{% block meta_description %}Manage and trade your digital carbon credit balance and market listings.{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 1.5rem; padding-bottom: 3.5rem;">
+
+    <!-- Page Header -->
+    <div class="page-header d-flex justify-between align-center flex-wrap gap-2">
+        <div>
+            <div class="status-pill">
+                <span class="dot"></span>
+                <span>DIGITAL ASSET LEDGER &bull; ENCRYPTED WALLET</span>
+            </div>
+            <h1 class="section-title">Carbon Credit Wallet</h1>
+            <p class="section-subtitle">Real-time asset holdings, minted certificates, and active market order positions</p>
+        </div>
+        <div class="d-flex gap-1">
+            <a href="/create-listing/" class="btn btn-primary btn-sm">🏷️ Create Listing</a>
+            <a href="/marketplace/" class="btn btn-outline btn-sm">🌐 Buy Credits</a>
+        </div>
+    </div>
+
+    <!-- Top Wallet Balance Highlight -->
+    <div class="glass-card glass-card-accent mb-3" style="border-color:rgba(0,255,180,0.4); text-align:center; padding:2.5rem 1.5rem;">
+        <div class="d-flex justify-between align-center flex-wrap gap-1" style="max-width:800px; margin:0 auto;">
+            <div style="text-align:left;">
+                <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--clr-cyan); letter-spacing:0.15em; text-transform:uppercase;">
+                    ⬡ AVAILABLE ASSET BALANCE
+                </span>
+                <div style="font-family:var(--font-head); font-size:clamp(2.4rem, 5vw, 3.8rem); font-weight:900; color:var(--clr-primary); text-shadow:0 0 35px rgba(0,255,180,0.6); line-height:1.1; margin:0.3rem 0;">
+                    {{ wallet.available_credits }} <span style="font-size:1.2rem; font-weight:600; color:var(--clr-cyan);">CREDITS</span>
+                </div>
+                <div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--clr-muted);">
+                    1 Credit &equiv; 1 Metric Ton of Verified CO2 Offset
+                </div>
+            </div>
+
+            <div class="d-flex flex-column gap-1" style="min-width:200px;">
+                <a href="/create-listing/" class="btn btn-primary btn-block">
+                    ⚡ List for Sale
+                </a>
+                <a href="/marketplace/" class="btn btn-outline btn-block">
+                    🛒 Purchase Offsets
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Split Sections: My Active Listings & Trade Ledger -->
+    <div class="grid-2 mb-3">
+        
+        <!-- Active Sales Listings -->
+        <div class="glass-card" id="my-listings-card">
+            <div class="d-flex justify-between align-center mb-2">
+                <div>
+                    <h2 class="card-title">My Market Listings</h2>
+                    <p class="section-subtitle">Credits listed on the public exchange</p>
+                </div>
+                <a href="/create-listing/" class="btn btn-outline btn-sm">+ New Listing</a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="futuristic-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Quantity</th>
+                            <th>Price/Unit</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for listing in my_listings %}
+                        <tr>
+                            <td style="font-family:var(--font-mono); color:var(--clr-cyan);">#L-{{ listing.id }}</td>
+                            <td style="font-family:var(--font-mono); font-weight:700; color:var(--clr-primary);">{{ listing.quantity }} t</td>
+                            <td style="font-family:var(--font-mono); color:var(--clr-text-bright);">${{ listing.price_per_credit }}</td>
+                            <td>
+                                {% if listing.status == 'Available' %}
+                                    <span class="badge badge-available">● Active</span>
+                                {% elif listing.status == 'Sold' %}
+                                    <span class="badge badge-verified">✓ Sold</span>
+                                {% else %}
+                                    <span class="badge badge-pending">{{ listing.status }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" style="text-align:center; padding:2rem; color:var(--clr-dim); font-family:var(--font-mono); font-size:0.8rem;">
+                                NO ACTIVE SALES LISTINGS
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="glass-card" id="recent-trades-card">
+            <div class="d-flex justify-between align-center mb-2">
+                <div>
+                    <h2 class="card-title">Recent Activity</h2>
+                    <p class="section-subtitle">Latest buy and sell executions</p>
+                </div>
+                <a href="/transaction-history/" class="btn btn-outline btn-sm">Full Ledger →</a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="futuristic-table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Total</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for buy in recent_purchases %}
+                        <tr>
+                            <td><span class="badge badge-info">BUY</span></td>
+                            <td style="font-family:var(--font-mono); font-weight:700; color:var(--clr-cyan);">+{{ buy.quantity }}</td>
+                            <td style="font-family:var(--font-mono); color:var(--clr-danger);">-${{ buy.total_price }}</td>
+                            <td style="font-family:var(--font-mono); font-size:0.75rem; color:var(--clr-muted);">{{ buy.transaction_date|date:"M d" }}</td>
+                        </tr>
+                        {% endfor %}
+
+                        {% for sell in recent_sales %}
+                        <tr>
+                            <td><span class="badge badge-success">SELL</span></td>
+                            <td style="font-family:var(--font-mono); font-weight:700; color:var(--clr-primary);">-{{ sell.quantity }}</td>
+                            <td style="font-family:var(--font-mono); color:var(--clr-primary);">+${{ sell.total_price }}</td>
+                            <td style="font-family:var(--font-mono); font-size:0.75rem; color:var(--clr-muted);">{{ sell.transaction_date|date:"M d" }}</td>
+                        </tr>
+                        {% endfor %}
+
+                        {% if not recent_purchases and not recent_sales %}
+                        <tr>
+                            <td colspan="4" style="text-align:center; padding:2rem; color:var(--clr-dim); font-family:var(--font-mono); font-size:0.8rem;">
+                                NO TRADE ACTIVITY YET
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
