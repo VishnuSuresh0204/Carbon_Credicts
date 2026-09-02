@@ -1,0 +1,153 @@
+{% extends "ORGANI/base.html" %}
+{% load static %}
+{% block title %}Transaction Ledger{% endblock %}
+{% block meta_description %}Immutable trade ledger of all carbon credit acquisitions and sales.{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 1.5rem; padding-bottom: 3.5rem;">
+
+    <!-- Page Header -->
+    <div class="page-header d-flex justify-between align-center flex-wrap gap-2">
+        <div>
+            <div class="status-pill">
+                <span class="dot"></span>
+                <span>DECENTRALIZED TRADE LEDGER &bull; AUDIT TRAIL</span>
+            </div>
+            <h1 class="section-title">Transaction History</h1>
+            <p class="section-subtitle">Complete chronological record of all carbon credit purchases and sales executions</p>
+        </div>
+        <a href="/wallet/" class="btn btn-outline btn-sm">💳 View Wallet</a>
+    </div>
+
+    <!-- Summary KPI Row -->
+    <div class="grid-4 mb-3">
+        <div class="stat-card">
+            <div class="stat-icon">🛒</div>
+            <div class="stat-value" style="color:var(--clr-cyan);">{{ total_bought_credits }} <span style="font-size:0.9rem;">t</span></div>
+            <div class="stat-label">Credits Purchased</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">💸</div>
+            <div class="stat-value" style="color:var(--clr-danger);">${{ total_spent }}</div>
+            <div class="stat-label">Capital Spent (Offsets)</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-value" style="color:#00ffb4;">{{ total_sold_credits }} <span style="font-size:0.9rem;">t</span></div>
+            <div class="stat-label">Credits Sold</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-value" style="color:#00ffb4;">${{ total_earned }}</div>
+            <div class="stat-label">Revenue Earned</div>
+        </div>
+    </div>
+
+    <!-- Trade Ledger Card with Tabs -->
+    <div class="glass-card">
+        
+        <div class="d-flex justify-between align-center flex-wrap gap-2 mb-3">
+            <div class="d-flex gap-1">
+                <button class="btn btn-outline btn-sm tx-tab-btn active" id="tab-purchases-btn" onclick="showTxTab('purchases', this)">
+                    🛒 Purchases ({{ purchases|length }})
+                </button>
+                <button class="btn btn-outline btn-sm tx-tab-btn" id="tab-sales-btn" onclick="showTxTab('sales', this)">
+                    ⚡ Sales ({{ sales|length }})
+                </button>
+            </div>
+        </div>
+
+        <!-- Purchases Table -->
+        <div id="section-purchases" class="table-responsive">
+            <table class="futuristic-table" id="purchases-table">
+                <thead>
+                    <tr>
+                        <th>Tx Hash</th>
+                        <th>Seller Organization</th>
+                        <th>Volume</th>
+                        <th>Price/Unit</th>
+                        <th>Total Settlement</th>
+                        <th>Timestamp</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tx in purchases %}
+                    <tr>
+                        <td style="font-family:var(--font-mono); color:var(--clr-cyan); font-weight:700;">#TX-{{ tx.id }}</td>
+                        <td style="font-weight:600; color:var(--clr-text-bright);">{{ tx.seller.organization_name }}</td>
+                        <td style="font-family:var(--font-mono); font-weight:700; color:var(--clr-primary);">+{{ tx.quantity }} t</td>
+                        <td style="font-family:var(--font-mono);">${{ tx.price_per_credit }}</td>
+                        <td style="font-family:var(--font-mono); color:var(--clr-danger); font-weight:700;">-${{ tx.total_price }}</td>
+                        <td style="font-family:var(--font-mono); font-size:0.8rem; color:var(--clr-muted);">{{ tx.transaction_date|date:"Y-m-d H:i" }}</td>
+                        <td><span class="badge badge-verified">✓ {{ tx.status }}</span></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding:2.5rem; color:var(--clr-dim); font-family:var(--font-mono);">
+                            NO CARBON CREDIT PURCHASES RECORDED
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Sales Table -->
+        <div id="section-sales" class="table-responsive" style="display:none;">
+            <table class="futuristic-table" id="sales-table">
+                <thead>
+                    <tr>
+                        <th>Tx Hash</th>
+                        <th>Buyer Organization</th>
+                        <th>Volume</th>
+                        <th>Price/Unit</th>
+                        <th>Total Settlement</th>
+                        <th>Timestamp</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tx in sales %}
+                    <tr>
+                        <td style="font-family:var(--font-mono); color:var(--clr-cyan); font-weight:700;">#TX-{{ tx.id }}</td>
+                        <td style="font-weight:600; color:var(--clr-text-bright);">{{ tx.buyer.organization_name }}</td>
+                        <td style="font-family:var(--font-mono); font-weight:700; color:var(--clr-cyan);">-{{ tx.quantity }} t</td>
+                        <td style="font-family:var(--font-mono);">${{ tx.price_per_credit }}</td>
+                        <td style="font-family:var(--font-mono); color:var(--clr-primary); font-weight:700;">+${{ tx.total_price }}</td>
+                        <td style="font-family:var(--font-mono); font-size:0.8rem; color:var(--clr-muted);">{{ tx.transaction_date|date:"Y-m-d H:i" }}</td>
+                        <td><span class="badge badge-verified">✓ {{ tx.status }}</span></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding:2.5rem; color:var(--clr-dim); font-family:var(--font-mono);">
+                            NO CARBON CREDIT SALES RECORDED
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    function showTxTab(tab, btn) {
+        document.querySelectorAll('.tx-tab-btn').forEach(function(b){ b.classList.remove('active'); });
+        btn.classList.add('active');
+
+        if (tab === 'purchases') {
+            document.getElementById('section-purchases').style.display = 'block';
+            document.getElementById('section-sales').style.display = 'none';
+        } else {
+            document.getElementById('section-purchases').style.display = 'none';
+            document.getElementById('section-sales').style.display = 'block';
+        }
+    }
+</script>
+{% endblock %}
