@@ -1,0 +1,190 @@
+{% extends "ORGANI/base.html" %}
+{% load static %}
+{% block title %}Log Emission Telemetry{% endblock %}
+{% block meta_description %}Submit industrial carbon emission metrics for automated calculation and validation.{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 1.5rem; padding-bottom: 3.5rem;">
+
+    <!-- Page Header -->
+    <div class="page-header d-flex justify-between align-center flex-wrap gap-2">
+        <div>
+            <div class="status-pill">
+                <span class="dot"></span>
+                <span>EMISSION SENSOR MATRIX &bull; CALIBRATION ACTIVE</span>
+            </div>
+            <h1 class="section-title">Submit Emission Log</h1>
+            <p class="section-subtitle">Record industrial energy, fuel, transport, and production data for ISO-14064 calculation</p>
+        </div>
+        <a href="/emission-history/" class="btn btn-outline btn-sm">📜 View History</a>
+    </div>
+
+    <!-- Main Grid: Form + Real-time Calculation Cockpit -->
+    <div class="grid-sidebar">
+
+        <!-- Left Form -->
+        <div class="glass-card" id="add-emission-form-card">
+            <h2 class="card-title mb-2">⚡ Telemetry Input Parameters</h2>
+            <p class="section-subtitle mb-3">Input operational resource units consumed during the tracking cycle</p>
+
+            <form method="POST" action="/add-emission/" id="emission-form">
+                {% csrf_token %}
+
+                <!-- Electricity Input -->
+                <div class="form-group">
+                    <label class="form-label" for="input-electricity">
+                        <span>⚡ Electricity Consumption</span>
+                        <span class="form-label-hint">kWh (Kilowatt-hours)</span>
+                    </label>
+                    <input type="number" step="any" min="0" class="form-control emission-calc-input" id="input-electricity" name="electricity_consumption" placeholder="e.g. 15000" required>
+                </div>
+
+                <!-- Fuel Input -->
+                <div class="form-group">
+                    <label class="form-label" for="input-fuel">
+                        <span>⛽ Fuel Consumption</span>
+                        <span class="form-label-hint">Liters (Diesel/Petrol/Gas)</span>
+                    </label>
+                    <input type="number" step="any" min="0" class="form-control emission-calc-input" id="input-fuel" name="fuel_consumption" placeholder="e.g. 3200" required>
+                </div>
+
+                <!-- Transportation Distance -->
+                <div class="form-group">
+                    <label class="form-label" for="input-distance">
+                        <span>🚚 Transportation & Logistics Distance</span>
+                        <span class="form-label-hint">Kilometers (km)</span>
+                    </label>
+                    <input type="number" step="any" min="0" class="form-control emission-calc-input" id="input-distance" name="transportation_distance" placeholder="e.g. 5400" required>
+                </div>
+
+                <!-- Production Level -->
+                <div class="form-group">
+                    <label class="form-label" for="input-production">
+                        <span>🏭 Industrial Production Level</span>
+                        <span class="form-label-hint">Units / Output Tons</span>
+                    </label>
+                    <input type="number" step="any" min="0" class="form-control emission-calc-input" id="input-production" name="production_level" placeholder="e.g. 850" required>
+                </div>
+
+                <div class="neon-divider"></div>
+
+                <button type="submit" id="submit-emission-btn" class="btn btn-primary btn-block">
+                    🚀 Compute & Transmit Record
+                </button>
+            </form>
+        </div>
+
+        <!-- Right Side: Live Estimation Gauge & Formula Breakdown -->
+        <div class="d-flex flex-column gap-2">
+            
+            <!-- Live Calculated Gauge -->
+            <div class="glass-card glass-card-accent" id="live-gauge-card" style="text-align:center;">
+                <h3 class="card-title" style="color:var(--clr-cyan); margin-bottom:0.5rem;">⚡ Real-time Telemetry</h3>
+                <p class="section-subtitle mb-2">Estimated Total CO2 Equivalent</p>
+
+                <div style="margin: 1.5rem 0;">
+                    <div style="font-family:var(--font-head); font-size:3rem; font-weight:900; color:var(--clr-primary); text-shadow:0 0 25px rgba(0,255,180,0.6);" id="live-total-display">
+                        0.00
+                    </div>
+                    <div style="font-family:var(--font-mono); font-size:0.85rem; color:var(--clr-cyan); letter-spacing:0.15em;">
+                        METRIC TONNES (tCO2e)
+                    </div>
+                </div>
+
+                <!-- Breakdown progress indicators -->
+                <div style="text-align:left; display:flex; flex-direction:column; gap:0.6rem; font-size:0.75rem; font-family:var(--font-mono);">
+                    <div>
+                        <div class="d-flex justify-between" style="color:var(--clr-muted); margin-bottom:0.2rem;">
+                            <span>⚡ ELECTRICITY (0.00082 t/kWh)</span>
+                            <span id="breakdown-elec" style="color:#00ffb4;">0.00 t</span>
+                        </div>
+                        <div style="height:4px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden;">
+                            <div id="bar-elec" style="height:100%; width:0%; background:#00ffb4; transition:width 0.3s ease;"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="d-flex justify-between" style="color:var(--clr-muted); margin-bottom:0.2rem;">
+                            <span>⛽ FUEL (0.00231 t/L)</span>
+                            <span id="breakdown-fuel" style="color:#00e5ff;">0.00 t</span>
+                        </div>
+                        <div style="height:4px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden;">
+                            <div id="bar-fuel" style="height:100%; width:0%; background:#00e5ff; transition:width 0.3s ease;"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="d-flex justify-between" style="color:var(--clr-muted); margin-bottom:0.2rem;">
+                            <span>🚚 TRANSPORT (0.00015 t/km)</span>
+                            <span id="breakdown-dist" style="color:#ffc800;">0.00 t</span>
+                        </div>
+                        <div style="height:4px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden;">
+                            <div id="bar-dist" style="height:100%; width:0%; background:#ffc800; transition:width 0.3s ease;"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="d-flex justify-between" style="color:var(--clr-muted); margin-bottom:0.2rem;">
+                            <span>🏭 PRODUCTION (0.04 t/unit)</span>
+                            <span id="breakdown-prod" style="color:#ff6b35;">0.00 t</span>
+                        </div>
+                        <div style="height:4px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden;">
+                            <div id="bar-prod" style="height:100%; width:0%; background:#ff6b35; transition:width 0.3s ease;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Standard Protocol Card -->
+            <div class="glass-card">
+                <h4 style="font-family:var(--font-head); font-size:0.85rem; color:var(--clr-primary); margin-bottom:0.4rem;">
+                    🌐 Scientific Standards
+                </h4>
+                <p style="font-size:0.76rem; color:var(--clr-muted); line-height:1.5;">
+                    Emission conversion factors follow IPCC & GHG Protocol standards. Submissions undergo administrative verification before carbon credits or offsets are calculated.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    function updateLiveEstimate() {
+        var e = parseFloat(document.getElementById('input-electricity').value) || 0;
+        var f = parseFloat(document.getElementById('input-fuel').value) || 0;
+        var d = parseFloat(document.getElementById('input-distance').value) || 0;
+        var p = parseFloat(document.getElementById('input-production').value) || 0;
+
+        var eCO2 = e * 0.00082;
+        var fCO2 = f * 0.00231;
+        var dCO2 = d * 0.00015;
+        var pCO2 = p * 0.04;
+        var total = eCO2 + fCO2 + dCO2 + pCO2;
+
+        document.getElementById('live-total-display').textContent = total.toFixed(3);
+        document.getElementById('breakdown-elec').textContent = eCO2.toFixed(3) + ' t';
+        document.getElementById('breakdown-fuel').textContent = fCO2.toFixed(3) + ' t';
+        document.getElementById('breakdown-dist').textContent = dCO2.toFixed(3) + ' t';
+        document.getElementById('breakdown-prod').textContent = pCO2.toFixed(3) + ' t';
+
+        if (total > 0) {
+            document.getElementById('bar-elec').style.width = Math.min(100, (eCO2 / total) * 100) + '%';
+            document.getElementById('bar-fuel').style.width = Math.min(100, (fCO2 / total) * 100) + '%';
+            document.getElementById('bar-dist').style.width = Math.min(100, (dCO2 / total) * 100) + '%';
+            document.getElementById('bar-prod').style.width = Math.min(100, (pCO2 / total) * 100) + '%';
+        } else {
+            document.getElementById('bar-elec').style.width = '0%';
+            document.getElementById('bar-fuel').style.width = '0%';
+            document.getElementById('bar-dist').style.width = '0%';
+            document.getElementById('bar-prod').style.width = '0%';
+        }
+    }
+
+    document.querySelectorAll('.emission-calc-input').forEach(function(input) {
+        input.addEventListener('input', updateLiveEstimate);
+    });
+</script>
+{% endblock %}
