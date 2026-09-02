@@ -1,0 +1,120 @@
+{% extends "ORGANI/base.html" %}
+{% load static %}
+{% block title %}Create Carbon Credit Listing{% endblock %}
+{% block meta_description %}List your verified carbon credits on the decentralized carbon marketplace.{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 1.5rem; padding-bottom: 3.5rem;">
+
+    <!-- Page Header -->
+    <div class="page-header d-flex justify-between align-center flex-wrap gap-2">
+        <div>
+            <div class="status-pill">
+                <span class="dot"></span>
+                <span>MARKETPLACE PROTOCOL &bull; ORDER CREATION</span>
+            </div>
+            <h1 class="section-title">List Credits for Sale</h1>
+            <p class="section-subtitle">Place your surplus carbon credits on the open exchange for peer organizations to acquire</p>
+        </div>
+        <a href="/wallet/" class="btn btn-outline btn-sm">💳 Back to Wallet</a>
+    </div>
+
+    <!-- Main Form Grid -->
+    <div class="grid-sidebar">
+
+        <!-- Listing Form -->
+        <div class="glass-card" id="create-listing-form-card">
+            <h2 class="card-title mb-2">🏷️ Order Parameters</h2>
+            <p class="section-subtitle mb-3">Specify volume and unit asking price</p>
+
+            <form method="POST" action="/create-listing/" id="listing-form">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label class="form-label" for="listing-quantity">
+                        <span>Quantity of Credits</span>
+                        <span class="form-label-hint">Available: <strong style="color:var(--clr-primary);">{{ wallet.available_credits }}</strong></span>
+                    </label>
+                    <input type="number" step="any" min="0.1" max="{{ wallet.available_credits }}" class="form-control listing-calc" id="listing-quantity" name="quantity" placeholder="e.g. 50" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="listing-price">
+                        <span>Asking Price per Credit</span>
+                        <span class="form-label-hint">USD ($) per 1 tCO2e</span>
+                    </label>
+                    <input type="number" step="any" min="0.01" class="form-control listing-calc" id="listing-price" name="price_per_credit" placeholder="e.g. 25.50" required>
+                </div>
+
+                <div class="neon-divider"></div>
+
+                <button type="submit" id="submit-listing-btn" class="btn btn-primary btn-block">
+                    ⚡ Confirm & Publish to Market
+                </button>
+            </form>
+        </div>
+
+        <!-- Right Side: Valuation Calculation & Terms -->
+        <div class="d-flex flex-column gap-2">
+            
+            <div class="glass-card glass-card-accent" style="text-align:center;">
+                <h3 class="card-title" style="color:var(--clr-cyan); margin-bottom:0.4rem;">💰 Estimated Gross Value</h3>
+                <p class="section-subtitle mb-2">Total Expected Settlement</p>
+
+                <div style="margin: 1.5rem 0;">
+                    <div style="font-family:var(--font-head); font-size:2.8rem; font-weight:900; color:var(--clr-primary); text-shadow:0 0 25px rgba(0,255,180,0.6);" id="total-val-display">
+                        $0.00
+                    </div>
+                    <div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--clr-muted);">
+                        UNITED STATES DOLLARS
+                    </div>
+                </div>
+
+                <div style="font-size:0.75rem; color:var(--clr-muted); font-family:var(--font-mono); text-align:left; padding:0.75rem; background:rgba(0,229,255,0.05); border-radius:6px;">
+                    <div class="d-flex justify-between mb-1">
+                        <span>VOLUME:</span>
+                        <span id="summary-qty" style="color:#fff;">0 Credits</span>
+                    </div>
+                    <div class="d-flex justify-between mb-1">
+                        <span>RATE:</span>
+                        <span id="summary-rate" style="color:#fff;">$0.00 / credit</span>
+                    </div>
+                    <div class="d-flex justify-between">
+                        <span>ESCROW LOCK:</span>
+                        <span style="color:var(--clr-primary);">Automated</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Market Policy Card -->
+            <div class="glass-card">
+                <h4 style="font-family:var(--font-head); font-size:0.85rem; color:var(--clr-primary); margin-bottom:0.35rem;">
+                    🛡️ Escrow Assurance
+                </h4>
+                <p style="font-size:0.76rem; color:var(--clr-muted); line-height:1.4;">
+                    Listed credits are locked from your wallet during the active offer duration to guarantee delivery upon buyer fulfillment.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    function updateListingVal() {
+        var q = parseFloat(document.getElementById('listing-quantity').value) || 0;
+        var p = parseFloat(document.getElementById('listing-price').value) || 0;
+        var total = q * p;
+
+        document.getElementById('total-val-display').textContent = '$' + total.toFixed(2);
+        document.getElementById('summary-qty').textContent = q.toFixed(2) + ' Credits';
+        document.getElementById('summary-rate').textContent = '$' + p.toFixed(2) + ' / credit';
+    }
+
+    document.querySelectorAll('.listing-calc').forEach(function(input) {
+        input.addEventListener('input', updateListingVal);
+    });
+</script>
+{% endblock %}
